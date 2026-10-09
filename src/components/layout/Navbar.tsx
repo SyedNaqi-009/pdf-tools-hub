@@ -52,9 +52,9 @@ export default function Navbar() {
           : 'bg-white/80 backdrop-blur-sm border-b border-slate-100'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex h-16 items-center justify-between gap-4">
-          {/* Logo & Always-visible Mobile Home Icon */}
+          {/* Logo */}
           <div className="flex items-center gap-3">
             <Link
               href="/"
@@ -67,18 +67,6 @@ export default function Navbar() {
               <span>
                 PDF<span className="text-blue-600">Tools</span>Hub
               </span>
-            </Link>
-
-            {/* Mobile Home Quick Icon - Always visible on mobile */}
-            <Link
-              href="/"
-              className={`md:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-700 transition-colors ${
-                pathname === '/' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-slate-50'
-              }`}
-              title="Home"
-              aria-label="Go to Home"
-            >
-              <Home className="h-4 w-4" />
             </Link>
           </div>
 
@@ -98,7 +86,7 @@ export default function Navbar() {
 
             {/* Mega Dropdown for PDF Tools */}
             <div
-              className="relative"
+              className="static"
               onMouseEnter={() => setIsDropdownOpen(true)}
               onMouseLeave={() => setIsDropdownOpen(false)}
             >
@@ -122,8 +110,8 @@ export default function Navbar() {
 
               {/* Mega Menu Dropdown Panel */}
               {isDropdownOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[720px] rounded-2xl border border-slate-200 bg-white p-6 shadow-xl ring-1 ring-slate-900/5 transition-all">
-                  <div className="grid grid-cols-3 gap-6">
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[calc(100vw-2rem)] max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl ring-1 ring-slate-900/5 transition-all z-50">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
                     {TOOL_CATEGORIES.map((category) => {
                       const categoryTools = TOOLS.filter((t) => t.category === category.id);
                       return (
@@ -200,9 +188,18 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Drawer Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Mobile Drawer (Slide-out) */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 md:hidden flex flex-col ${
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[320px] sm:max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
