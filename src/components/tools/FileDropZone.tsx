@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { UploadCloud, File, X, AlertCircle } from 'lucide-react';
+import { UploadCloud, File, X, AlertCircle, Shield, CheckCircle2 } from 'lucide-react';
 
 interface FileDropZoneProps {
   files: File[];
@@ -44,7 +44,7 @@ export default function FileDropZone({
 
       // File size check
       if (file.size > maxSizeBytes) {
-        setErrorMessage(`"${file.name}" exceeds the maximum size of ${maxSizeMB}MB.`);
+        setErrorMessage(`"${file.name}" exceeds the maximum size limit of ${maxSizeMB}MB.`);
         continue;
       }
 
@@ -111,11 +111,11 @@ export default function FileDropZone({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => !disabled && inputRef.current?.click()}
-        className={`relative flex min-h-[220px] sm:min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 sm:p-10 text-center transition-all ${
+        className={`relative flex min-h-[220px] sm:min-h-[250px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all ${
           isDragging
-            ? 'border-blue-600 bg-blue-50/70 scale-[0.99]'
-            : 'border-slate-300 bg-slate-50/60 hover:border-blue-400 hover:bg-slate-50'
-        } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+            ? 'border-rose-600 bg-rose-50/70 scale-[0.99]'
+            : 'border-zinc-300 bg-zinc-50/70 hover:border-zinc-900 hover:bg-zinc-100/60'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <input
           ref={inputRef}
@@ -128,26 +128,28 @@ export default function FileDropZone({
           aria-label="Upload files"
         />
 
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm border border-slate-100 mb-4 transition-transform group-hover:scale-105">
-          <UploadCloud className="h-8 w-8" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-rose-600 shadow-md border border-zinc-200 mb-4 transition-transform group-hover:scale-105">
+          <UploadCloud className="h-7 w-7" />
         </div>
 
-        <p className="text-base sm:text-lg font-semibold text-slate-800">
-          Drop your files here, or <span className="text-blue-600 underline">browse</span>
+        <p className="text-base sm:text-lg font-bold text-zinc-900">
+          Drop files into the Studio, or <span className="text-rose-600 underline font-extrabold">browse</span>
         </p>
-        <p className="mt-1.5 text-xs sm:text-sm text-slate-500 max-w-sm">
-          {acceptDescription} · 100% Client-side processing
+        
+        <p className="mt-1 text-xs text-zinc-500 max-w-sm">
+          {acceptDescription} · Max {maxSizeMB}MB
         </p>
 
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-slate-400">
-          <span>🔒 Private & Secure · Files never leave your browser</span>
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-zinc-900 px-3 py-1 text-[10px] font-mono font-medium text-zinc-300">
+          <Shield className="h-3 w-3 text-emerald-400" />
+          <span>ZERO-UPLOAD SANDBOX · PROCESSED LOCALLY</span>
         </div>
       </div>
 
       {/* Error Message */}
       {errorMessage && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs sm:text-sm text-red-700">
-          <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+        <div className="flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs sm:text-sm text-rose-800">
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -155,31 +157,32 @@ export default function FileDropZone({
       {/* Selected Files List */}
       {files.length > 0 && (
         <div className="space-y-2 pt-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">
-            <span>Selected {files.length === 1 ? 'Document' : `Documents (${files.length})`}</span>
+          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-zinc-500 uppercase tracking-wider px-1">
+            <span>Selected Files ({files.length})</span>
             {allowMultiple && files.length > 1 && (
               <button
                 type="button"
                 onClick={() => onFilesChange([])}
-                className="text-red-600 hover:underline cursor-pointer"
+                className="text-rose-600 hover:underline cursor-pointer"
               >
-                Clear all
+                Clear All
               </button>
             )}
           </div>
-          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+          
+          <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white shadow-xs">
             {files.map((file, idx) => (
               <div
                 key={`${file.name}-${idx}`}
-                className="flex items-center justify-between p-3 sm:p-4 text-sm"
+                className="flex items-center justify-between p-3 sm:p-3.5 text-xs sm:text-sm"
               >
                 <div className="flex items-center gap-3 min-w-0 pr-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700">
                     <File className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-800">{file.name}</p>
-                    <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+                    <p className="truncate font-semibold text-zinc-900">{file.name}</p>
+                    <p className="text-[11px] text-zinc-400 font-mono">{formatFileSize(file.size)}</p>
                   </div>
                 </div>
                 {!disabled && (
@@ -189,7 +192,7 @@ export default function FileDropZone({
                       e.stopPropagation();
                       removeFile(idx);
                     }}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
                     aria-label={`Remove ${file.name}`}
                   >
                     <X className="h-4 w-4" />

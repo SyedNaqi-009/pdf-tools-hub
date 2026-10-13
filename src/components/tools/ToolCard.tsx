@@ -28,6 +28,7 @@ import {
   FileEdit,
   ArrowRight,
   LucideIcon,
+  Sparkles,
 } from 'lucide-react';
 import { ToolItem } from '@/lib/tools-data';
 
@@ -71,17 +72,22 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
     return (
       <Link
         href={`/tools/${tool.slug}`}
-        className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3.5 transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:shadow-xs"
+        className="group flex items-center justify-between rounded-xl border border-zinc-200/80 bg-white p-3.5 transition-all hover:border-zinc-900 hover:shadow-sm"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-800 transition-colors group-hover:bg-rose-600 group-hover:text-white">
             <IconComponent className="h-4.5 w-4.5" />
           </div>
-          <span className="truncate text-sm font-semibold text-slate-800 group-hover:text-blue-600">
-            {tool.name}
-          </span>
+          <div className="min-w-0">
+            <span className="truncate text-sm font-bold text-zinc-900 group-hover:text-rose-600 block">
+              {tool.name}
+            </span>
+            <span className="text-[11px] text-zinc-400 font-mono">
+              .{tool.outputExtension.toUpperCase()} OUT
+            </span>
+          </div>
         </div>
-        <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:translate-x-0.5 group-hover:text-blue-600 transition-transform" />
+        <ArrowRight className="h-4 w-4 shrink-0 text-zinc-400 group-hover:translate-x-0.5 group-hover:text-zinc-900 transition-transform" />
       </Link>
     );
   }
@@ -89,30 +95,44 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
   return (
     <Link
       href={`/tools/${tool.slug}`}
-      className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+      className="group relative flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-zinc-900 hover:shadow-lg"
     >
       <div>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+        {/* Top Header Badge & Icon */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-all duration-200 group-hover:bg-rose-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-rose-950/20">
             <IconComponent className="h-6 w-6" />
           </div>
-          {tool.tier === 1 && (
-            <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-              Popular
+          
+          <div className="flex items-center gap-1.5">
+            {tool.tier === 1 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-rose-700 border border-rose-200/60 uppercase">
+                <Sparkles className="h-2.5 w-2.5 text-rose-600" />
+                POPULAR
+              </span>
+            )}
+            <span className="text-[10px] font-mono text-zinc-400 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-200">
+              .{tool.outputExtension.toUpperCase()}
             </span>
-          )}
+          </div>
         </div>
-        <h3 className="mt-4 text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+
+        {/* Title & Short Description */}
+        <h3 className="text-base sm:text-lg font-bold text-zinc-900 group-hover:text-rose-600 transition-colors">
           {tool.name}
         </h3>
-        <p className="mt-2 text-sm text-slate-600 leading-relaxed line-clamp-2">
+        <p className="mt-2 text-xs sm:text-sm text-zinc-600 leading-relaxed line-clamp-2">
           {tool.shortDescription}
         </p>
       </div>
 
-      <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-blue-600 group-hover:text-blue-700">
-        <span>Use Tool</span>
-        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+      {/* Bottom Action Footer */}
+      <div className="mt-6 border-t border-zinc-100 pt-3 flex items-center justify-between text-xs font-semibold text-zinc-500 group-hover:text-zinc-900">
+        <span className="font-mono text-[11px] text-zinc-400">100% Client-Side</span>
+        <span className="inline-flex items-center gap-1 font-bold text-rose-600 group-hover:text-rose-700">
+          Open Studio
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+        </span>
       </div>
     </Link>
   );

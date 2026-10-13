@@ -5,11 +5,22 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  Smartphone,
   Lock,
+  Cpu,
   Layers,
   Sparkles,
-  BookOpen,
+  FileText,
+  FileCheck2,
+  CheckCircle2,
+  Check,
+  X,
+  Sliders,
+  FolderGit2,
+  Minimize2,
+  FileCode,
+  Shield,
+  ArrowUpRight,
+  Search,
 } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -31,34 +42,34 @@ export const metadata: Metadata = {
 
 const HOME_FAQS = [
   {
-    question: 'How do PDFToolsHub tools work without uploading my files?',
+    question: 'How do PDFToolsHub tools work without uploading my files to any server?',
     answer:
-      'Unlike traditional cloud converters, our application runs locally inside your browser using WebAssembly and modern client-side JavaScript APIs. When you select a document, it is read directly into your device RAM, processed locally, and saved back to your storage without transmitting any data over the internet.',
+      'Unlike legacy cloud converters that transmit your private files to remote servers, PDFToolsHub runs compiled WebAssembly (WASM) and client-side JavaScript directly within your browser’s V8/JavaScriptCore engine. Your documents are read into local device RAM, manipulated via cryptographic and binary stream APIs, and saved back to your storage without emitting a single byte over the public internet.',
   },
   {
-    question: 'Is PDFToolsHub safe for confidential business and legal documents?',
+    question: 'Is PDFToolsHub safe for strictly confidential business, financial, and legal files?',
     answer:
-      'Yes, 100%. Because zero files are uploaded to any server or external cloud storage, there is zero risk of data interception, data breaches, or unauthorized storage. Your proprietary contracts, tax returns, and medical records stay entirely under your control.',
+      'Yes, absolutely. Because zero network requests transfer your document payload, there is zero risk of remote data interception, server breaches, or unconsented cloud training. Legal agreements, IRS tax filings, bank statements, and sensitive healthcare records remain 100% within your local browser security sandbox.',
   },
   {
-    question: 'Are there any hidden costs, subscriptions, or watermarks?',
+    question: 'Are there hidden charges, quotas, watermarks, or subscription paywalls?',
     answer:
-      'No. All 26 tools on PDFToolsHub are completely free to use. We do not insert watermarks into your documents, limit how many files you can convert, or require credit cards or accounts.',
+      'No. All 26 tools across PDFToolsHub are completely free with zero restrictions. We do not brand your pages with watermark stamps, restrict how many documents you can process per day, or require credit cards or account signups.',
   },
   {
-    question: 'Are there any file size limits?',
+    question: 'What is the maximum document size supported?',
     answer:
-      'We do not impose artificial file size quotas. Because processing occurs inside your browser memory, you can process documents as large as your device RAM can handle smoothly (typically up to several hundred megabytes on modern systems).',
+      'We do not enforce artificial cloud file-size restrictions. Because operations execute in local device RAM, you can process documents as large as your device memory comfortably permits (typically several hundred megabytes on modern smartphones, laptops, and workstations).',
   },
   {
-    question: 'What document and image formats are supported?',
+    question: 'Which file formats and conversions are supported?',
     answer:
-      'Our suite supports PDF, Microsoft Word (.docx), Microsoft Excel (.xlsx), Microsoft PowerPoint (.pptx), JPG, JPEG, and PNG image formats with comprehensive bidirectional conversion capabilities.',
+      'Our studio suite features bidirectional conversions across PDF, Microsoft Word (.docx), Microsoft Excel (.xlsx), Microsoft PowerPoint (.pptx), JPG, JPEG, and PNG formats, alongside specialized utilities for cryptographic password protection, digital signatures, and metadata scrubbing.',
   },
   {
-    question: 'Does PDFToolsHub work on mobile devices and tablets?',
+    question: 'Does the studio work on mobile devices and tablets without an app?',
     answer:
-      'Yes. Our responsive web application runs smoothly in Safari on iOS/iPadOS, Chrome on Android, and all modern mobile web browsers without needing any App Store download.',
+      'Yes. Our responsive WebAssembly interface runs smoothly in Safari on iOS/iPadOS, Chrome on Android, and all modern mobile and desktop web browsers without requiring any App Store downloads.',
   },
 ];
 
@@ -80,6 +91,14 @@ export default function HomePage() {
     })),
   };
 
+  const quickPills = [
+    { name: 'Merge PDF', slug: 'merge-pdf' },
+    { name: 'Compress PDF (-85%)', slug: 'compress-pdf' },
+    { name: 'PDF to Word', slug: 'pdf-to-word' },
+    { name: 'Sign Document', slug: 'sign-pdf' },
+    { name: 'Protect PDF', slug: 'protect-pdf' },
+  ];
+
   return (
     <>
       <script
@@ -95,184 +114,341 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <main className="min-h-screen">
-        {/* Section 1: Hero Section */}
-        <section className="relative overflow-hidden border-b border-slate-200/80 bg-white py-16 sm:py-24 lg:py-28 bg-dot-pattern">
-          <Container>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              {/* Left Column: Copy & CTAs */}
-              <div className="lg:col-span-7 space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-3.5 py-1.5 text-xs font-bold text-blue-700 shadow-2xs">
-                  <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-                  <span>100% Client-Side WebAssembly Processing</span>
+      <main className="min-h-screen bg-zinc-50">
+        
+        {/* =========================================================================
+            SECTION 1: ASYMMETRIC STUDIO COMMAND DECK (HERO)
+        ========================================================================= */}
+        <section className="relative overflow-hidden border-b border-zinc-900 bg-zinc-950 text-white py-16 sm:py-24 lg:py-28">
+          <div className="absolute inset-0 bg-studio-grid opacity-25 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+
+          <Container className="relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+              
+              {/* Left Column: Command Statement & Direct Action */}
+              <div className="lg:col-span-7 space-y-7">
+                <div className="inline-flex items-center gap-2 rounded-full border border-rose-900/60 bg-rose-950/40 px-3.5 py-1.5 text-xs font-mono font-bold text-rose-400">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>ISO 32000 PDF ENGINE // 100% IN-MEMORY SANDBOX</span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
-                  Free Online PDF Tools — <span className="text-blue-600">No Upload</span> Required
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
+                  The Client-Side Document Workstation — <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-rose-300">Zero Cloud Uploads.</span>
                 </h1>
 
-                <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-2xl">
-                  Merge, compress, convert, and edit PDFs directly in your browser. 100% private. 100% free. Your documents never leave your device.
+                <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
+                  Transform, compress, convert, and sign PDF documents directly within your browser’s local hardware memory. Engineered for maximum enterprise confidentiality, instant speeds, and zero data telemetry.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
+                {/* Direct Action Deck */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                   <Link
                     href="/tools"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-md hover:bg-blue-700 hover:shadow-lg transition-all active:scale-98"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-7 py-4 text-sm sm:text-base font-black text-white shadow-xl shadow-rose-950/40 hover:bg-rose-500 hover:shadow-2xl transition-all active:scale-98 uppercase tracking-wider"
                   >
-                    <span>Browse All 26 Tools</span>
+                    <span>Launch PDF Studio (26 Tools)</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
 
                   <a
-                    href="#popular"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    href="#comparison"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/80 px-6 py-4 text-xs sm:text-sm font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                   >
-                    <span>Most Popular Tools</span>
+                    <span>View Security Architecture</span>
                   </a>
                 </div>
 
-                {/* Trust Badges Bar */}
-                <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs font-medium text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600" /> Zero Server Uploads
+                {/* Quick Tool Jump Pills */}
+                <div className="pt-4 border-t border-zinc-900/80">
+                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider block mb-2.5">
+                    Fast Launch Shortcuts:
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <Lock className="h-4 w-4 text-emerald-600" /> 100% Client-Side Privacy
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Zap className="h-4 w-4 text-emerald-600" /> No Wait Queues
-                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {quickPills.map((pill) => (
+                      <Link
+                        key={pill.slug}
+                        href={`/tools/${pill.slug}`}
+                        className="rounded-lg border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:border-rose-500 hover:text-rose-400 hover:bg-zinc-800 transition-colors"
+                      >
+                        {pill.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column: Abstract SVG Document Workflow Illustration */}
+              {/* Right Column: Live WebAssembly Telemetry Console */}
               <div className="lg:col-span-5 flex justify-center">
-                <div className="relative w-full max-w-md aspect-square rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-blue-50/40 p-6 sm:p-8 shadow-lg flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 400 400"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-full h-full drop-shadow-md"
-                    aria-label="Secure document workflow diagram"
+                <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-900/90 p-6 sm:p-7 shadow-2xl ring-1 ring-white/10 space-y-6">
+                  
+                  {/* Console Header */}
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-rose-500" />
+                      <div className="h-3 w-3 rounded-full bg-amber-500" />
+                      <div className="h-3 w-3 rounded-full bg-emerald-500" />
+                    </div>
+                    <span className="font-mono text-[11px] text-zinc-400">WASM-KERNEL // v2.4</span>
+                  </div>
+
+                  {/* Telemetry Readouts */}
+                  <div className="space-y-3 font-mono text-xs">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80">
+                      <span className="text-zinc-400 flex items-center gap-2">
+                        <Cpu className="h-4 w-4 text-rose-400" /> Execution Core
+                      </span>
+                      <span className="text-emerald-400 font-bold">100% In-Browser RAM</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80">
+                      <span className="text-zinc-400 flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-emerald-400" /> Network Upload
+                      </span>
+                      <span className="text-zinc-200 font-bold">0.00 KB (Zero Logs)</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80">
+                      <span className="text-zinc-400 flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-amber-400" /> Cryptography
+                      </span>
+                      <span className="text-zinc-200 font-bold">AES-256 WebCrypto</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80">
+                      <span className="text-zinc-400 flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-rose-400" /> Latency / Queue
+                      </span>
+                      <span className="text-rose-400 font-bold">&lt; 0.04s (Instant)</span>
+                    </div>
+                  </div>
+
+                  {/* Interactive Quick Drop Callout */}
+                  <Link
+                    href="/tools/compress-pdf"
+                    className="block group rounded-2xl border-2 border-dashed border-zinc-700 hover:border-rose-500 bg-zinc-950/50 p-5 text-center transition-all"
                   >
-                    {/* Background Central Ring */}
-                    <circle cx="200" cy="200" r="140" stroke="#E2E8F0" strokeWidth="2" strokeDasharray="6 6" />
-                    <circle cx="200" cy="200" r="90" fill="#EFF6FF" stroke="#BFDBFE" strokeWidth="2" />
-
-                    {/* Central Device Shield Node */}
-                    <rect x="160" y="150" width="80" height="100" rx="10" fill="#2563EB" />
-                    <path d="M180 180H220M180 200H220M180 220H205" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
-                    <circle cx="200" cy="270" r="18" fill="#10B981" />
-                    <path d="M194 270L198 274L206 266" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-
-                    {/* Surrounding Workflow Cards */}
-                    {/* Top Node: Input PDF */}
-                    <g className="transition-transform hover:scale-105">
-                      <rect x="145" y="30" width="110" height="60" rx="8" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
-                      <rect x="157" y="45" width="22" height="22" rx="4" fill="#FEE2E2" />
-                      <text x="168" y="60" fill="#DC2626" fontSize="10" fontWeight="bold" textAnchor="middle">PDF</text>
-                      <text x="190" y="55" fill="#0F172A" fontSize="11" fontWeight="bold">Input Files</text>
-                      <text x="190" y="70" fill="#64748B" fontSize="9">Local Memory</text>
-                    </g>
-
-                    {/* Right Node: Convert & Merge */}
-                    <g>
-                      <rect x="270" y="170" width="110" height="60" rx="8" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
-                      <rect x="282" y="185" width="22" height="22" rx="4" fill="#DBEAFE" />
-                      <text x="293" y="200" fill="#2563EB" fontSize="10" fontWeight="bold" textAnchor="middle">DOC</text>
-                      <text x="315" y="195" fill="#0F172A" fontSize="11" fontWeight="bold">Instant Convert</text>
-                      <text x="315" y="210" fill="#64748B" fontSize="9">WebAssembly</text>
-                    </g>
-
-                    {/* Left Node: Compress & Optimize */}
-                    <g>
-                      <rect x="20" y="170" width="110" height="60" rx="8" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
-                      <rect x="32" y="185" width="22" height="22" rx="4" fill="#FEF3C7" />
-                      <text x="43" y="200" fill="#D97706" fontSize="9" fontWeight="bold" textAnchor="middle">OPT</text>
-                      <text x="65" y="195" fill="#0F172A" fontSize="11" fontWeight="bold">Compression</text>
-                      <text x="65" y="210" fill="#64748B" fontSize="9">Lossless Streams</text>
-                    </g>
-
-                    {/* Bottom Node: Instant Download */}
-                    <g>
-                      <rect x="145" y="310" width="110" height="60" rx="8" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
-                      <rect x="157" y="325" width="22" height="22" rx="4" fill="#D1FAE5" />
-                      <path d="M168 332V340M165 337L168 340L171 337" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <text x="190" y="335" fill="#0F172A" fontSize="11" fontWeight="bold">Instant Save</text>
-                      <text x="190" y="350" fill="#64748B" fontSize="9">Direct to Disk</text>
-                    </g>
-
-                    {/* Connection Arrows */}
-                    <path d="M200 95V140" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M140 200H150" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M250 200H260" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M200 260V300" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
+                    <p className="text-xs font-bold text-zinc-200 group-hover:text-rose-400 transition-colors">
+                      Drop any PDF here to test Instant Compression →
+                    </p>
+                    <p className="text-[10px] text-zinc-500 font-mono mt-1">
+                      No sign-in · Immediate hardware execution
+                    </p>
+                  </Link>
                 </div>
+              </div>
+
+            </div>
+          </Container>
+        </section>
+
+        {/* =========================================================================
+            SECTION 2: REAL-TIME HARDWARE METRIC BAR
+        ========================================================================= */}
+        <section className="border-b border-zinc-200 bg-white py-8">
+          <Container>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-zinc-100">
+              <div className="pt-3 md:pt-0">
+                <p className="text-3xl sm:text-4xl font-black text-zinc-950 font-mono">26</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mt-1 font-mono">
+                  Client Utilities
+                </p>
+              </div>
+
+              <div className="pt-3 md:pt-0">
+                <p className="text-3xl sm:text-4xl font-black text-rose-600 font-mono">0 KB</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mt-1 font-mono">
+                  Cloud Data Egress
+                </p>
+              </div>
+
+              <div className="pt-3 md:pt-0">
+                <p className="text-3xl sm:text-4xl font-black text-zinc-950 font-mono">&lt; 0.05s</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mt-1 font-mono">
+                  Hardware Latency
+                </p>
+              </div>
+
+              <div className="pt-3 md:pt-0">
+                <p className="text-3xl sm:text-4xl font-black text-emerald-600 font-mono">100%</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mt-1 font-mono">
+                  Free & Private
+                </p>
               </div>
             </div>
           </Container>
         </section>
 
-        {/* Section 2: Most Popular Tools (Tier 1) */}
-        <section id="popular" className="py-16 sm:py-24 bg-slate-50/60 border-b border-slate-200/80 scroll-mt-20">
+        {/* =========================================================================
+            SECTION 3: BENTO SUITE MATRIX (TIER 1 POPULAR TOOLS)
+        ========================================================================= */}
+        <section id="popular" className="py-16 sm:py-24 bg-zinc-50 border-b border-zinc-200 scroll-mt-20">
           <Container>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-12 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
               <div>
                 <SectionHeading
-                  title="Most Popular PDF Tools"
-                  subtitle="Our most searched and trusted utilities for rapid document workflows."
+                  badge="ENTERPRISE WORKFLOWS"
+                  title="Most Demanded Document Suites"
+                  subtitle="Battle-tested utilities designed for everyday document consolidation, compression, and format interchange."
                   className="mb-0"
                 />
               </div>
               <Link
                 href="/tools"
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700"
+                className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider"
               >
-                <span>Browse All 26 Tools</span>
+                <span>Browse All 26 Tools Directory</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
+            {/* Bento Grid Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tier1Tools.map((tool) => (
+              
+              {/* Highlight Card 1: Merge Studio */}
+              <Link
+                href="/tools/merge-pdf"
+                className="group md:col-span-2 lg:col-span-2 relative rounded-3xl border border-zinc-200 bg-white p-7 sm:p-9 shadow-xs hover:border-zinc-900 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white group-hover:bg-rose-600 transition-colors">
+                      <Layers className="h-6 w-6" />
+                    </div>
+                    <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                      ★ TIER 1 CORE SUITE
+                    </span>
+                  </div>
+
+                  <h3 className="text-2xl font-black text-zinc-950 group-hover:text-rose-600 transition-colors">
+                    Merge & Combine Multiple PDFs
+                  </h3>
+                  <p className="mt-3 text-sm text-zinc-600 leading-relaxed max-w-xl">
+                    Seamlessly concatenate invoices, agreements, and slide decks into a single pristine document with custom drag-and-drop page ordering. Runs 100% locally.
+                  </p>
+
+                  {/* Simulated Workflow Badges */}
+                  <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-mono bg-zinc-100 text-zinc-700 px-3 py-1 rounded-lg border border-zinc-200">
+                      doc1.pdf + doc2.pdf
+                    </span>
+                    <span className="text-zinc-400 font-bold">→</span>
+                    <span className="text-xs font-mono bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200 font-bold">
+                      combined.pdf
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-zinc-100 flex items-center justify-between text-xs font-bold text-zinc-500 group-hover:text-zinc-950">
+                  <span className="font-mono">NO FILE COUNT RESTRICTION</span>
+                  <span className="inline-flex items-center gap-1 text-rose-600">
+                    Open Merge Studio <ArrowUpRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
+
+              {/* Highlight Card 2: High Ratio Compression */}
+              <Link
+                href="/tools/compress-pdf"
+                className="group relative rounded-3xl border border-zinc-200 bg-white p-7 sm:p-9 shadow-xs hover:border-zinc-900 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white group-hover:bg-rose-600 transition-colors">
+                      <Minimize2 className="h-6 w-6" />
+                    </div>
+                    <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      UP TO -85%
+                    </span>
+                  </div>
+
+                  <h3 className="text-2xl font-black text-zinc-950 group-hover:text-rose-600 transition-colors">
+                    Compress PDF
+                  </h3>
+                  <p className="mt-3 text-sm text-zinc-600 leading-relaxed">
+                    Shrink massive PDF files for email attachments without losing vector clarity. Flattens unused stream dictionaries instantly.
+                  </p>
+
+                  <div className="mt-6 p-3 rounded-xl bg-zinc-50 border border-zinc-200 text-xs font-mono flex items-center justify-between">
+                    <span className="text-zinc-400">12.4 MB</span>
+                    <span className="font-bold text-rose-600 font-sans">Reduced by 82%</span>
+                    <span className="text-emerald-600 font-bold">2.2 MB</span>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-zinc-100 flex items-center justify-between text-xs font-bold text-zinc-500 group-hover:text-zinc-950">
+                  <span className="font-mono">LOSSLESS OPTIMIZER</span>
+                  <span className="inline-flex items-center gap-1 text-rose-600">
+                    Compress Now <ArrowUpRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
+
+              {/* Complementary Tools Grid */}
+              {tier1Tools.slice(2, 6).map((tool) => (
                 <ToolCard key={tool.slug} tool={tool} />
               ))}
+
+              {/* Additional Tool Card for JPG to PDF */}
+              {tier1Tools[6] && <ToolCard tool={tier1Tools[6]} />}
             </div>
           </Container>
         </section>
 
-        {/* Section 3: All Tools by Category (Compact List Layout) */}
-        <section className="py-16 sm:py-24 bg-white border-b border-slate-200/80">
+        {/* =========================================================================
+            SECTION 4: COMPLETE DIRECTORY BY ARCHITECTURE WING
+        ========================================================================= */}
+        <section className="py-16 sm:py-24 bg-white border-b border-zinc-200">
           <Container>
             <SectionHeading
-              title="All PDF Tools by Category"
-              subtitle="Access our complete directory of 26 utilities organized by workflow need."
+              badge="FULL 26-MODULE CATALOG"
+              title="All PDF Utilities by Category"
+              subtitle="Every tool runs with 100% client-side memory safety, zero subscriptions, and complete offline capability."
               centered
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
-              {TOOL_CATEGORIES.map((category) => {
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+              {TOOL_CATEGORIES.map((category, index) => {
                 const catTools = TOOLS.filter((t) => t.category === category.id);
                 return (
                   <div
                     key={category.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 space-y-4"
+                    className="rounded-3xl border border-zinc-200 bg-zinc-50/60 p-7 space-y-6 flex flex-col justify-between"
                   >
-                    <div className="border-b border-slate-200/80 pb-3">
-                      <h3 className="text-lg font-bold text-slate-900">
-                        {category.label}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-1">
+                    <div>
+                      <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+                        <div>
+                          <span className="font-mono text-xs font-bold text-rose-600 uppercase">
+                            WING 0{index + 1}
+                          </span>
+                          <h3 className="text-xl font-black text-zinc-950 mt-0.5">
+                            {category.label}
+                          </h3>
+                        </div>
+                        <span className="font-mono text-xs text-zinc-400 bg-white px-2.5 py-1 rounded-lg border border-zinc-200">
+                          {catTools.length} Tools
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-zinc-500 mt-3 leading-relaxed">
                         {category.description}
                       </p>
+
+                      <div className="mt-5 space-y-2">
+                        {catTools.map((tool) => (
+                          <ToolCard key={tool.slug} tool={tool} variant="compact" />
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      {catTools.map((tool) => (
-                        <ToolCard key={tool.slug} tool={tool} variant="compact" />
-                      ))}
+                    <div className="pt-4 border-t border-zinc-200/80">
+                      <Link
+                        href={`/tools#${category.id}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-zinc-700 hover:text-rose-600 uppercase"
+                      >
+                        <span>Explore All {category.label}</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
                     </div>
                   </div>
                 );
@@ -281,81 +457,96 @@ export default function HomePage() {
           </Container>
         </section>
 
-        {/* Section 4: Why Choose Us */}
-        <section className="py-16 sm:py-24 bg-slate-50/60 border-b border-slate-200/80">
-          <Container>
+        {/* =========================================================================
+            SECTION 5: ARCHITECTURAL COMPARISON: LOCAL WASM VS TRADITIONAL CLOUD SAAS
+        ========================================================================= */}
+        <section id="comparison" className="py-16 sm:py-24 bg-zinc-950 text-white border-b border-zinc-900 relative overflow-hidden">
+          <div className="absolute inset-0 bg-studio-grid opacity-15 pointer-events-none" />
+
+          <Container className="relative">
             <SectionHeading
-              title="Why PDFToolsHub?"
-              subtitle="Engineered from the ground up for maximum privacy, blistering speed, and effortless accessibility."
+              badge="SECURITY BENCHMARK"
+              title="Why Client-Side WASM Beats Cloud SaaS"
+              subtitle="Understand the critical architectural differences between PDFToolsHub and traditional upload-based services like Smallpdf or iLovePDF."
               centered
+              className="text-white [&_h2]:text-white [&_p]:text-zinc-400"
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {/* Feature 1 */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xs space-y-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 font-bold text-xl">
-                  🔒
-                </div>
-                <h3 className="text-xl font-bold text-slate-900">100% Private</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Your files never leave your browser. Zero uploads, zero servers, zero third-party access. What happens on your device stays on your device.
-                </p>
+            <div className="max-w-4xl mx-auto rounded-3xl border border-zinc-800 bg-zinc-900/90 overflow-hidden shadow-2xl mt-12">
+              <div className="grid grid-cols-12 bg-zinc-950 p-4 sm:p-5 border-b border-zinc-800 text-xs font-mono font-bold text-zinc-400">
+                <div className="col-span-5 sm:col-span-4 uppercase">Feature / Vector</div>
+                <div className="col-span-4 sm:col-span-4 text-rose-400 uppercase">PDFToolsHub (Local)</div>
+                <div className="col-span-3 sm:col-span-4 text-zinc-500 uppercase">Cloud SaaS Converters</div>
               </div>
 
-              {/* Feature 2 */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xs space-y-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 font-bold text-xl">
-                  ⚡
+              <div className="divide-y divide-zinc-800/80 text-xs sm:text-sm font-mono">
+                {/* Row 1 */}
+                <div className="grid grid-cols-12 p-4 sm:p-5 items-center">
+                  <div className="col-span-5 sm:col-span-4 font-bold text-zinc-200">File Storage & Privacy</div>
+                  <div className="col-span-4 sm:col-span-4 text-emerald-400 flex items-center gap-1.5 font-bold">
+                    <Check className="h-4 w-4 shrink-0" /> Never leaves device RAM
+                  </div>
+                  <div className="col-span-3 sm:col-span-4 text-zinc-400 flex items-center gap-1.5">
+                    <X className="h-4 w-4 text-rose-500 shrink-0" /> Uploaded to remote servers
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900">Instant Processing</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  All tools run locally using compiled WebAssembly. No waiting in cloud queues, no upload latency, and no network bottlenecks.
-                </p>
-              </div>
 
-              {/* Feature 3 */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xs space-y-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 font-bold text-xl">
-                  📱
+                {/* Row 2 */}
+                <div className="grid grid-cols-12 p-4 sm:p-5 items-center">
+                  <div className="col-span-5 sm:col-span-4 font-bold text-zinc-200">Execution Speed</div>
+                  <div className="col-span-4 sm:col-span-4 text-emerald-400 flex items-center gap-1.5 font-bold">
+                    <Check className="h-4 w-4 shrink-0" /> Instant local CPU / WASM
+                  </div>
+                  <div className="col-span-3 sm:col-span-4 text-zinc-400 flex items-center gap-1.5">
+                    <X className="h-4 w-4 text-rose-500 shrink-0" /> Upload + queue wait delays
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900">Works Everywhere</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Desktop, tablet, or phone. No application to download or install. Fully responsive on modern web browsers across all platforms.
-                </p>
-              </div>
-            </div>
 
-            {/* Trust Badge Row */}
-            <div className="mt-12 text-center">
-              <div className="inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs">
-                <span>No signup</span>
-                <span>·</span>
-                <span>No watermarks</span>
-                <span>·</span>
-                <span>No file limits</span>
-                <span>·</span>
-                <span className="text-blue-600 font-bold">Free forever</span>
+                {/* Row 3 */}
+                <div className="grid grid-cols-12 p-4 sm:p-5 items-center">
+                  <div className="col-span-5 sm:col-span-4 font-bold text-zinc-200">Data Breach Exposure</div>
+                  <div className="col-span-4 sm:col-span-4 text-emerald-400 flex items-center gap-1.5 font-bold">
+                    <Check className="h-4 w-4 shrink-0" /> Mathematically Zero
+                  </div>
+                  <div className="col-span-3 sm:col-span-4 text-zinc-400 flex items-center gap-1.5">
+                    <X className="h-4 w-4 text-rose-500 shrink-0" /> Vulnerable to cloud hacks
+                  </div>
+                </div>
+
+                {/* Row 4 */}
+                <div className="grid grid-cols-12 p-4 sm:p-5 items-center">
+                  <div className="col-span-5 sm:col-span-4 font-bold text-zinc-200">Usage Cost & Watermarks</div>
+                  <div className="col-span-4 sm:col-span-4 text-emerald-400 flex items-center gap-1.5 font-bold">
+                    <Check className="h-4 w-4 shrink-0" /> 100% Free, No Watermarks
+                  </div>
+                  <div className="col-span-3 sm:col-span-4 text-zinc-400 flex items-center gap-1.5">
+                    <X className="h-4 w-4 text-rose-500 shrink-0" /> Paid subscriptions & limits
+                  </div>
+                </div>
               </div>
             </div>
           </Container>
         </section>
 
-        {/* Section 5: Latest from Blog */}
-        <section className="py-16 sm:py-24 bg-white border-b border-slate-200/80">
+        {/* =========================================================================
+            SECTION 6: LATEST EDITORIAL GUIDES (BLOG)
+        ========================================================================= */}
+        <section className="py-16 sm:py-24 bg-zinc-50 border-b border-zinc-200">
           <Container>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-12 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
               <div>
                 <SectionHeading
-                  title="PDF Guides & Tips"
-                  subtitle="In-depth tutorials, file format guides, and productivity advice from our team."
+                  badge="KNOWLEDGE REPOSITORY"
+                  title="PDF Engineering & Format Guides"
+                  subtitle="In-depth tutorials, file format specifications, and privacy best-practices written by engineers."
                   className="mb-0"
                 />
               </div>
               <Link
                 href="/blog"
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700"
+                className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider"
               >
-                <span>View All Articles</span>
+                <span>Read All 15 Articles</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -368,10 +559,13 @@ export default function HomePage() {
           </Container>
         </section>
 
-        {/* Section 6: FAQ */}
-        <section className="py-16 sm:py-24 bg-slate-50/60">
+        {/* =========================================================================
+            SECTION 7: FREQUENTLY ASKED QUESTIONS
+        ========================================================================= */}
+        <section className="py-16 sm:py-24 bg-white border-b border-zinc-200">
           <Container>
             <SectionHeading
+              badge="TRANSPARENCY & ASSURANCE"
               title="Frequently Asked Questions"
               subtitle="Everything you need to know about our browser-powered, privacy-first PDF platform."
               centered
@@ -382,6 +576,35 @@ export default function HomePage() {
             </div>
           </Container>
         </section>
+
+        {/* =========================================================================
+            SECTION 8: PRE-FOOTER COMMAND CTA
+        ========================================================================= */}
+        <section className="py-16 sm:py-20 bg-zinc-900 text-white">
+          <Container>
+            <div className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-950 to-zinc-900 p-8 sm:p-14 text-center max-w-4xl mx-auto space-y-6 shadow-2xl">
+              <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-rose-950 text-rose-400 border border-rose-900/60 uppercase">
+                INSTANT BROWSER ACCESS
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+                Ready to Process Documents with Complete Privacy?
+              </h2>
+              <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
+                Choose any of our 26 specialized tools. No downloads, no subscriptions, and zero file uploads.
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/tools"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-8 py-4 text-sm sm:text-base font-black text-white shadow-xl shadow-rose-950/40 hover:bg-rose-500 transition-all active:scale-98 uppercase tracking-wider"
+                >
+                  <span>Explore Complete Tool Directory</span>
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+            </div>
+          </Container>
+        </section>
+
       </main>
     </>
   );

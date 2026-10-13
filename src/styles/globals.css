@@ -1,22 +1,48 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --brand-primary: #dc2626;
+    --brand-dark: #09090b;
+    --brand-surface: #ffffff;
+    --brand-muted: #71717a;
+    --brand-border: #e4e4e7;
+  }
+
   html {
     scroll-behavior: smooth;
     font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     overflow-x: hidden;
+    background-color: #fafafa;
+    color: #18181b;
   }
   
   body {
-    background-color: #ffffff;
-    color: #0f172a;
+    background-color: #fafafa;
+    color: #18181b;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
+
+  ::selection {
+    background-color: #fecdd3;
+    color: #9f1239;
+  }
 }
 
-.bg-dot-pattern {
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 24px 24px;
+/* Subtle Technical Studio Grid */
+.bg-studio-grid {
+  background-image: 
+    linear-gradient(to right, rgba(228, 228, 231, 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(228, 228, 231, 0.4) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-studio-radial {
+  background: radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.05) 0%, transparent 70%);
+}
+
+.glow-crimson {
+  box-shadow: 0 0 25px -5px rgba(225, 29, 72, 0.15);
 }

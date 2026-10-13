@@ -1,9 +1,21 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Menu, X, ChevronDown, ChevronRight, Layers, ArrowRight } from 'lucide-react';
+import { 
+  Home, 
+  Menu, 
+  X, 
+  ChevronDown, 
+  ChevronRight, 
+  ArrowRight, 
+  FileText,
+  Shield,
+  Layers,
+  Sparkles,
+  Search
+} from 'lucide-react';
 import { TOOLS, TOOL_CATEGORIES } from '@/lib/tools-data';
 
 export default function Navbar() {
@@ -16,10 +28,11 @@ export default function Navbar() {
     convert: false,
     utility: false,
   });
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 15);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -39,99 +52,125 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { label: 'Blog', href: '/blog' },
+    { label: 'All Tools', href: '/tools', badge: '26' },
+    { label: 'Guides & Blog', href: '/blog' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
   ];
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-200 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 shadow-xs backdrop-blur-md border-b border-slate-200'
-          : 'bg-white/80 backdrop-blur-sm border-b border-slate-100'
+          ? 'bg-zinc-950/90 text-white shadow-lg backdrop-blur-md border-b border-zinc-800/80'
+          : 'bg-zinc-950 text-white border-b border-zinc-900'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="flex h-16 items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
+        <div className="flex h-16 sm:h-18 items-center justify-between gap-4">
+          
+          {/* Brand Logo & Engine Indicator */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-xl sm:text-2xl font-bold tracking-tight text-slate-900 group"
+              className="flex items-center gap-2.5 group"
               aria-label="PDFToolsHub Home"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs group-hover:bg-blue-700 transition-colors">
-                <Layers className="h-5 w-5" />
-              </span>
-              <span>
-                PDF<span className="text-blue-600">Tools</span>Hub
-              </span>
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-md shadow-rose-950/50 group-hover:scale-105 transition-transform duration-200">
+                <FileText className="h-5 w-5" />
+                <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-zinc-950" title="100% In-Memory Sandbox" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg font-black tracking-tight text-white leading-tight">
+                  PDF<span className="text-rose-500">TOOLS</span>
+                  <span className="text-xs font-mono font-medium text-zinc-400 ml-1 tracking-widest uppercase">HUB</span>
+                </span>
+                <span className="text-[10px] font-mono text-zinc-400 tracking-wider flex items-center gap-1">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  WASM CLIENT ENGINE
+                </span>
+              </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+          <nav className="hidden md:flex items-center gap-1 lg:gap-1.5">
             <Link
               href="/"
-              className={`px-3 py-2 text-sm font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-1.5 ${
                 pathname === '/'
-                  ? 'text-blue-600 bg-blue-50/80'
-                  : 'text-slate-700 hover:text-blue-600 hover:bg-slate-50'
+                  ? 'text-rose-400 bg-rose-950/40 border border-rose-900/50'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
               }`}
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-3.5 w-3.5" />
               <span>Home</span>
             </Link>
 
             {/* Mega Dropdown for PDF Tools */}
             <div
               className="static"
+              ref={dropdownRef}
               onMouseEnter={() => setIsDropdownOpen(true)}
               onMouseLeave={() => setIsDropdownOpen(false)}
             >
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen((v) => !v)}
-                className={`px-3 py-2 text-sm font-semibold rounded-md transition-colors flex items-center gap-1 cursor-pointer ${
+                className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
                   pathname.startsWith('/tools')
-                    ? 'text-blue-600 bg-blue-50/80'
-                    : 'text-slate-700 hover:text-blue-600 hover:bg-slate-50'
+                    ? 'text-rose-400 bg-rose-950/40 border border-rose-900/50'
+                    : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
                 }`}
                 aria-expanded={isDropdownOpen}
               >
-                <span>PDF Tools</span>
+                <span>Tool Suite</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    isDropdownOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'
+                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                    isDropdownOpen ? 'rotate-180 text-rose-400' : 'text-zinc-500'
                   }`}
                 />
               </button>
 
               {/* Mega Menu Dropdown Panel */}
               {isDropdownOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[calc(100vw-2rem)] max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl ring-1 ring-slate-900/5 transition-all z-50">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[calc(100vw-2rem)] max-w-4xl rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl ring-1 ring-white/10 transition-all z-50 text-zinc-100">
+                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-zinc-800">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-rose-400" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                        26 Client-Side Document Utilities
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-mono text-zinc-400 bg-zinc-800/80 px-2 py-0.5 rounded border border-zinc-700">
+                      ZERO-TELEMETRY SANDBOX
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {TOOL_CATEGORIES.map((category) => {
                       const categoryTools = TOOLS.filter((t) => t.category === category.id);
                       return (
                         <div key={category.id} className="space-y-3">
-                          <div className="border-b border-slate-100 pb-2">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          <div className="flex items-center justify-between pb-1.5 border-b border-zinc-800">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-rose-400">
                               {category.label}
                             </h3>
+                            <span className="text-[10px] font-mono text-zinc-500">
+                              {categoryTools.length}
+                            </span>
                           </div>
                           <ul className="space-y-1">
                             {categoryTools.slice(0, 7).map((tool) => (
                               <li key={tool.slug}>
                                 <Link
                                   href={`/tools/${tool.slug}`}
-                                  className="group flex items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                  className="group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                                 >
                                   <span className="truncate">{tool.name}</span>
                                   {tool.tier === 1 && (
-                                    <span className="ml-1 text-[10px] font-semibold text-orange-500 uppercase">
-                                      Hot
+                                    <span className="ml-1 text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-rose-950 text-rose-400 border border-rose-900 uppercase">
+                                      HOT
                                     </span>
                                   )}
                                 </Link>
@@ -143,15 +182,16 @@ export default function Navbar() {
                     })}
                   </div>
 
-                  <div className="mt-5 border-t border-slate-100 pt-3 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">
-                      All 26 tools process 100% in your browser. Zero server uploads.
+                  <div className="mt-6 border-t border-zinc-800 pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="h-3.5 w-3.5 text-emerald-400" />
+                      100% In-Memory Browser Execution. Zero Uploads.
                     </span>
                     <Link
                       href="/tools"
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                      className="inline-flex items-center gap-1.5 font-bold text-rose-400 hover:text-rose-300 transition-colors"
                     >
-                      <span>View All Tools</span>
+                      <span>Explore Complete Directory</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>
@@ -163,23 +203,37 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
+                className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-1.5 ${
                   pathname === link.href
-                    ? 'text-blue-600 bg-blue-50/80'
-                    : 'text-slate-700 hover:text-blue-600 hover:bg-slate-50'
+                    ? 'text-rose-400 bg-rose-950/40 border border-rose-900/50'
+                    : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                    {link.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
 
-          {/* Mobile Right Controls: Hamburger Button */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* Right Action: Quick Security Badge + Mobile Menu Toggle */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/tools"
+              className="hidden lg:inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-500 transition-colors uppercase tracking-wider"
+            >
+              <span>Launch Studio</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+
+            {/* Mobile Hamburger Button */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 md:hidden"
               aria-label={isMobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -191,7 +245,7 @@ export default function Navbar() {
       {/* Mobile Drawer Backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs md:hidden transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-hidden="true"
         />
@@ -199,76 +253,76 @@ export default function Navbar() {
 
       {/* Mobile Drawer (Slide-out) */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[320px] sm:max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[320px] sm:max-w-sm bg-zinc-950 text-white border-l border-zinc-800 shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
+        <div className="flex h-16 items-center justify-between border-b border-zinc-800 px-5">
           <Link
             href="/"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2 text-lg font-bold text-slate-900"
+            className="flex items-center gap-2 text-base font-bold text-white"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <Layers className="h-4 w-4" />
-            </span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600 text-white">
+              <FileText className="h-4 w-4" />
+            </div>
             <span>
-              PDF<span className="text-blue-600">Tools</span>Hub
+              PDF<span className="text-rose-500">TOOLS</span>HUB
             </span>
           </Link>
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900"
             aria-label="Close Menu"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
           {/* Mobile Home Link */}
           <Link
             href="/"
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2.5 text-base font-semibold rounded-lg ${
-              pathname === '/' ? 'bg-blue-50 text-blue-600' : 'text-slate-800 hover:bg-slate-50'
+            className={`flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg ${
+              pathname === '/' ? 'bg-rose-950 text-rose-400 border border-rose-900' : 'text-zinc-300 hover:bg-zinc-900'
             }`}
           >
-            <Home className="h-5 w-5" />
+            <Home className="h-4 w-4" />
             <span>Home</span>
           </Link>
 
           {/* Categorized Tools Accordion in Mobile */}
           <div className="space-y-2">
-            <div className="px-3 text-xs font-bold uppercase tracking-wider text-slate-400">
-              PDF Tools
+            <div className="px-3 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+              PDF Studio Tools (26)
             </div>
             {TOOL_CATEGORIES.map((cat) => {
               const isOpen = isMobileCategoryOpen[cat.id];
               const categoryTools = TOOLS.filter((t) => t.category === cat.id);
               return (
-                <div key={cat.id} className="rounded-lg border border-slate-100 overflow-hidden">
+                <div key={cat.id} className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => toggleMobileCategory(cat.id)}
-                    className="flex w-full items-center justify-between bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800"
+                    className="flex w-full items-center justify-between bg-zinc-900 px-3.5 py-2.5 text-xs font-semibold text-zinc-200"
                   >
                     <span>{cat.label}</span>
                     <ChevronRight
-                      className={`h-4 w-4 transition-transform duration-200 ${
-                        isOpen ? 'rotate-90' : ''
+                      className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
+                        isOpen ? 'rotate-90 text-rose-400' : ''
                       }`}
                     />
                   </button>
                   {isOpen && (
-                    <div className="bg-white p-2 space-y-1">
+                    <div className="bg-zinc-950 p-2 space-y-1 border-t border-zinc-800/60">
                       {categoryTools.map((tool) => (
                         <Link
                           key={tool.slug}
                           href={`/tools/${tool.slug}`}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="block rounded-md px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
+                          className="block rounded-lg px-3 py-2 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-white"
                         >
                           {tool.name}
                         </Link>
@@ -281,34 +335,40 @@ export default function Navbar() {
             <Link
               href="/tools"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-blue-600 hover:underline"
+              className="flex items-center justify-between px-3 py-2 text-xs font-bold text-rose-400 hover:underline"
             >
-              <span>Browse All 26 Tools →</span>
+              <span>View All 26 Tools Directory →</span>
             </Link>
           </div>
 
-          <div className="border-t border-slate-100 pt-4 space-y-1">
+          <div className="border-t border-zinc-800 pt-4 space-y-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-3 py-2 text-base font-semibold rounded-lg ${
+                className={`flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg ${
                   pathname === link.href
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-slate-800 hover:bg-slate-50'
+                    ? 'bg-rose-950 text-rose-400 border border-rose-900'
+                    : 'text-zinc-300 hover:bg-zinc-900'
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">
+                    {link.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
         </div>
 
-        <div className="border-t border-slate-100 p-6 bg-slate-50">
-          <p className="text-xs text-slate-500 text-center">
-            🔒 100% Client-Side. No uploads, no servers.
-          </p>
+        <div className="border-t border-zinc-800 p-5 bg-zinc-900/50">
+          <div className="flex items-center gap-2 text-xs text-emerald-400">
+            <Shield className="h-4 w-4 shrink-0" />
+            <span>100% In-Memory. No cloud tracking.</span>
+          </div>
         </div>
       </div>
     </header>

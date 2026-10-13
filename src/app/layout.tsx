@@ -82,11 +82,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen flex flex-col font-sans antialiased text-slate-900 bg-white">
+      <body className="min-h-screen flex flex-col font-sans antialiased text-zinc-950 bg-zinc-50">
         {/* Skip to Content for Accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg focus:outline-hidden"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white shadow-lg focus:outline-hidden"
         >
           Skip to main content
         </a>

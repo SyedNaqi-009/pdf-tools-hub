@@ -12,15 +12,20 @@ interface FAQAccordionProps {
 
 export default function FAQAccordion({ items, className = '' }: FAQAccordionProps) {
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-3 sm:space-y-4 ${className}`}>
       {items.map((item, index) => (
         <details
           key={index}
-          className="group rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-slate-300 open:border-blue-200 open:shadow-xs"
+          className="group rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 transition-all duration-200 hover:border-zinc-400 open:border-zinc-900 open:shadow-md"
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900 focus:outline-hidden">
-            <span className="text-base sm:text-lg pr-4">{item.question}</span>
-            <span className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-transform duration-200 group-open:rotate-180 group-open:bg-blue-50 group-open:text-blue-600">
+          <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-zinc-900 focus:outline-hidden">
+            <div className="flex items-center gap-3 pr-4">
+              <span className="font-mono text-xs text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200/60">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="text-base sm:text-lg">{item.question}</span>
+            </div>
+            <span className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 transition-transform duration-200 group-open:rotate-180 group-open:bg-zinc-900 group-open:text-white">
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -33,9 +38,9 @@ export default function FAQAccordion({ items, className = '' }: FAQAccordionProp
               </svg>
             </span>
           </summary>
-          <p className="mt-4 text-sm sm:text-base leading-relaxed text-slate-600 border-t border-slate-100 pt-3">
+          <div className="mt-4 text-xs sm:text-sm leading-relaxed text-zinc-600 border-t border-zinc-100 pt-4 pl-8">
             {item.answer}
-          </p>
+          </div>
         </details>
       ))}
     </div>

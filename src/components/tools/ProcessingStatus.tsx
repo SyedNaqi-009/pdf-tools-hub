@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Cpu } from 'lucide-react';
 
 interface ProcessingStatusProps {
   isProcessing: boolean;
@@ -16,12 +16,12 @@ export default function ProcessingStatus({
 }: ProcessingStatusProps) {
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
-        <div className="flex items-center gap-2 font-semibold">
-          <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
-          <span>Processing Error</span>
+      <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-5 text-rose-900">
+        <div className="flex items-center gap-2.5 font-bold text-sm">
+          <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
+          <span>Execution Warning / Processing Error</span>
         </div>
-        <p className="mt-1 text-sm text-red-700">{error}</p>
+        <p className="mt-2 text-xs sm:text-sm text-rose-700 leading-relaxed font-mono">{error}</p>
       </div>
     );
   }
@@ -29,25 +29,34 @@ export default function ProcessingStatus({
   if (!isProcessing) return null;
 
   return (
-    <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-6 text-center space-y-4">
-      <div className="flex items-center justify-center gap-2 text-blue-600">
-        <Loader2 className="h-6 w-6 animate-spin" />
-        <span className="font-semibold text-slate-800 text-sm sm:text-base">
-          {statusText}
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-100 shadow-xl space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5 text-rose-400">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="font-bold text-sm sm:text-base text-white">
+            {statusText}
+          </span>
+        </div>
+        <span className="font-mono text-xs font-bold text-zinc-400">
+          {Math.round(progress)}%
         </span>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+      {/* Progress Track */}
+      <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden ring-1 ring-zinc-700/50">
         <div
-          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+          className="bg-gradient-to-r from-rose-600 to-rose-400 h-2 rounded-full transition-all duration-300 shadow-sm shadow-rose-500/50"
           style={{ width: `${Math.max(5, Math.min(100, progress))}%` }}
         />
       </div>
 
-      <p className="text-xs text-slate-500">
-        Running locally in your browser memory via WebAssembly...
-      </p>
+      <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 pt-1">
+        <span className="flex items-center gap-1.5">
+          <Cpu className="h-3 w-3 text-emerald-400" />
+          WebAssembly Sandbox Execution
+        </span>
+        <span>0 Bytes Uploaded</span>
+      </div>
     </div>
   );
 }
