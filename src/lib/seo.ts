@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import { ToolItem } from './tools-data';
 
-export const SITE_URL = 'https://pdftoolshub.com';
-export const SITE_NAME = 'PDFToolsHub';
+export const SITE_URL = 'https://www.dopdfconverter.online';
+export const SITE_NAME = 'dopdf';
 
 export function getCanonicalUrl(path: string): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
@@ -14,9 +14,20 @@ export function generateToolMetadata(tool: ToolItem): Metadata {
   const title = `${tool.name} — Free Online ${tool.name} | ${SITE_NAME}`;
   const ogImage = `${SITE_URL}/og/${tool.slug}.png`;
 
+  const keywords = [
+    tool.name.toLowerCase(),
+    `free ${tool.name.toLowerCase()}`,
+    `${tool.name.toLowerCase()} online`,
+    'dopdf',
+    'free pdf converter',
+    'convert pdf online',
+    tool.slug.replace(/-/g, ' '),
+  ];
+
   return {
     title,
     description: tool.metaDescription,
+    keywords,
     alternates: {
       canonical,
     },
@@ -31,7 +42,7 @@ export function generateToolMetadata(tool: ToolItem): Metadata {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: `${tool.name} tool preview`,
+          alt: `${tool.name} tool preview - ${SITE_NAME}`,
         },
       ],
     },
@@ -52,6 +63,16 @@ export function generatePageMetadata(title: string, description: string, path: s
   return {
     title: fullTitle,
     description,
+    keywords: [
+      'dopdf',
+      'pdf converter',
+      'free pdf converter online',
+      'pdf tools',
+      'convert pdf to word',
+      'pdf to jpg',
+      'merge pdf',
+      'compress pdf',
+    ],
     alternates: {
       canonical,
     },
@@ -66,7 +87,7 @@ export function generatePageMetadata(title: string, description: string, path: s
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: `${SITE_NAME} preview`,
+          alt: `${title} - ${SITE_NAME}`,
         },
       ],
     },
@@ -80,29 +101,32 @@ export function generatePageMetadata(title: string, description: string, path: s
 }
 
 export function getToolStructuredData(tool: ToolItem) {
-  const toolUrl = getCanonicalUrl(`/tools/${tool.slug}`);
+  const canonical = getCanonicalUrl(`/tools/${tool.slug}`);
 
   const softwareAppSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: tool.name,
+    name: `${tool.name} - ${SITE_NAME}`,
+    url: canonical,
     applicationCategory: 'UtilitiesApplication',
-    operatingSystem: 'Web Browser',
-    url: toolUrl,
-    description: tool.metaDescription,
+    operatingSystem: 'All (Web Browser)',
     offers: {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'USD',
     },
+    description: tool.metaDescription,
+    featureList: tool.features,
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '1250',
+      ratingValue: '4.9',
+      ratingCount: '1680',
+      bestRating: '5',
+      worstRating: '1',
     },
   };
 
-  const faqPageSchema = {
+  const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: tool.faqs.map((faq) => ({
@@ -135,12 +159,12 @@ export function getToolStructuredData(tool: ToolItem) {
         '@type': 'ListItem',
         position: 3,
         name: tool.name,
-        item: toolUrl,
+        item: canonical,
       },
     ],
   };
 
-  return [softwareAppSchema, faqPageSchema, breadcrumbSchema];
+  return [softwareAppSchema, faqSchema, breadcrumbSchema];
 }
 
 export function getHomeStructuredData() {

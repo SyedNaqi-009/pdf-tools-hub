@@ -5,15 +5,15 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { generatePageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = generatePageMetadata(
-  'Privacy Policy — Zero File Uploads & Local Processing | PDFToolsHub',
-  'Read the PDFToolsHub Privacy Policy. We guarantee zero file uploads, zero server-side storage, and strict document confidentiality.',
+  'Privacy Policy — Zero File Uploads & Local Processing | dopdf',
+  'Read the dopdf Privacy Policy. We guarantee zero file uploads, zero server-side storage, and strict document confidentiality.',
   '/privacy-policy'
 );
 
 export default function PrivacyPolicyPage() {
   return (
     <main className="min-h-screen bg-zinc-50 pb-24">
-      {/* Studio Header Hero */}
+      {/* Header Hero */}
       <div className="border-b border-zinc-900 bg-zinc-950 text-white py-12 sm:py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-studio-grid opacity-25 pointer-events-none" />
         <Container className="relative">
@@ -37,10 +37,10 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">1. Our Core Commitment: Zero File Uploads</h2>
             <p>
-              At PDFToolsHub (accessible from pdftoolshub.com), your privacy is not merely an afterthought — it is the foundational architecture upon which our entire platform is engineered. We understand that PDF documents frequently contain sensitive, private, proprietary, financial, or personal information.
+              At dopdf (accessible from dopdfconverter.online), your privacy is not merely an afterthought — it is the foundational architecture upon which our entire platform is engineered. We understand that PDF documents frequently contain sensitive, private, proprietary, financial, or personal information.
             </p>
             <p>
-              <strong>We do not upload, transmit, store, inspect, process, or retain any of your PDF files or converted documents on our servers.</strong> Every single tool on PDFToolsHub operates entirely within your web browser (client-side) using WebAssembly, HTML5 APIs, and JavaScript. Your files never leave your local device memory (RAM), ensuring absolute confidentiality.
+              <strong>We do not upload, transmit, store, inspect, process, or retain any of your PDF files or converted documents on our servers.</strong> Every single tool on dopdf operates entirely within your web browser (client-side) using WebAssembly, HTML5 APIs, and JavaScript. Your files never leave your local device memory (RAM), ensuring absolute confidentiality.
             </p>
           </section>
 
@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">4. Cookies and Web Beacons</h2>
             <p>
-              PDFToolsHub does not use intrusive tracking cookies, cross-site profiling trackers, or session recording scripts. We may use minimal, privacy-compliant functional cookies to preserve user preferences (such as light/dark mode choices). You can disable cookies at any time via your browser settings without affecting the functionality of our client-side PDF tools.
+              dopdf does not use intrusive tracking cookies, cross-site profiling trackers, or session recording scripts. We may use minimal, privacy-compliant functional cookies to preserve user preferences (such as light/dark mode choices). You can disable cookies at any time via your browser settings without affecting the functionality of our client-side PDF tools.
             </p>
           </section>
 
@@ -97,8 +97,8 @@ export default function PrivacyPolicyPage() {
               If you have any questions or feedback regarding our privacy practices, please contact us at:
             </p>
             <p className="font-mono text-xs sm:text-sm text-zinc-900 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
-              Email: privacy@pdftoolshub.com<br />
-              Inquiries: pdftoolshub.com/contact
+              Email: privacy@dopdfconverter.online<br />
+              Inquiries: dopdfconverter.online/contact
             </p>
           </section>
         </div>

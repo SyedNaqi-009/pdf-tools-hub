@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { FileText, Shield, Cpu, Lock, CheckCircle2, ArrowRight } from 'lucide-react';
+import { FileText, Shield, Cpu, Lock, CheckCircle2 } from 'lucide-react';
 import Container from '../ui/Container';
 import { TOOLS } from '@/lib/tools-data';
 
@@ -67,31 +67,30 @@ export default function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-600 text-white shadow-md shadow-rose-950/50">
                 <FileText className="h-4.5 w-4.5" />
               </div>
-              <span className="text-lg font-black tracking-tight text-white">
-                PDF<span className="text-rose-500">TOOLS</span>
-                <span className="text-xs font-mono font-medium text-zinc-400 ml-1">HUB</span>
+              <span className="text-xl font-black tracking-tight text-white lowercase">
+                do<span className="text-rose-500">pdf</span>
               </span>
             </Link>
             
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-sm">
-              The high-performance, client-side document processing workstation. Transform, compress, convert, and secure PDF documents locally with absolute privacy and zero cloud footprint.
+              The high-performance, client-side document processing platform. Transform, compress, convert, and secure PDF documents locally with absolute privacy and zero cloud footprint.
             </p>
 
             <div className="pt-2">
               <div className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs font-mono text-zinc-300">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>ALL 26 ENGINES OPERATIONAL</span>
+                <span className="flex h-2 w-2 rounded-full bg-emerald-400" />
+                <span>CLIENT-SIDE PRIVACY ENGINE</span>
               </div>
             </div>
           </div>
 
-          {/* Column 2: Core PDF Operations */}
+          {/* Column 2: Document Converters */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200 font-mono">
-              Core Operations
+              Document Converters
             </h3>
             <ul className="space-y-2 text-xs">
-              {coreTools.map((tool) => (
+              {convertTools.map((tool) => (
                 <li key={tool.slug}>
                   <Link
                     href={`/tools/${tool.slug}`}
@@ -104,13 +103,13 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Format Conversion Engine */}
+          {/* Column 3: Core Operations */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200 font-mono">
-              Document Converters
+              Core Operations
             </h3>
             <ul className="space-y-2 text-xs">
-              {convertTools.map((tool) => (
+              {coreTools.map((tool) => (
                 <li key={tool.slug}>
                   <Link
                     href={`/tools/${tool.slug}`}
@@ -131,7 +130,7 @@ export default function Footer() {
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/tools" className="hover:text-rose-400 transition-colors font-semibold text-zinc-300">
-                  All 26 Tools Directory →
+                  All 27 Tools Directory →
                 </Link>
               </li>
               <li>
@@ -141,12 +140,12 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/about" className="hover:text-rose-400 transition-colors">
-                  About Our Architecture
+                  About dopdf
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-rose-400 transition-colors">
-                  Contact Technical Support
+                  Contact Support
                 </Link>
               </li>
               <li>
@@ -170,7 +169,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-14 border-t border-zinc-900 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500 font-mono">
-          <p>© {new Date().getFullYear()} PDFToolsHub Workstation. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} dopdf. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy-policy" className="hover:underline">Privacy</Link>
             <span>•</span>

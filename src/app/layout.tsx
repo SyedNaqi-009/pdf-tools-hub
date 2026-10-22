@@ -12,27 +12,31 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pdftoolshub.com'),
+  metadataBase: new URL('https://www.dopdfconverter.online'),
   title: {
-    default: 'Free Online PDF Tools — No Upload Required | PDFToolsHub',
-    template: '%s | PDFToolsHub',
+    default: 'Free PDF Converter Online | dopdf',
+    template: '%s | dopdf',
   },
   description:
-    'Merge, compress, convert, edit, and sign PDF files directly in your browser. 100% private, client-side processing, zero server uploads, and completely free.',
+    'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
   keywords: [
-    'PDF tools',
+    'dopdf',
+    'free PDF converter',
+    'PDF converter online',
+    'PDF to Word',
+    'Word to PDF',
+    'translate PDF',
+    'PDF language converter',
     'merge PDF',
     'compress PDF',
-    'PDF to Word',
     'split PDF',
     'convert PDF',
     'sign PDF',
-    'free PDF editor',
     'client side PDF',
   ],
-  authors: [{ name: 'PDFToolsHub' }],
-  creator: 'PDFToolsHub',
-  publisher: 'PDFToolsHub',
+  authors: [{ name: 'dopdf' }],
+  creator: 'dopdf',
+  publisher: 'dopdf',
   formatDetection: {
     email: false,
     address: false,
@@ -41,26 +45,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://pdftoolshub.com',
-    siteName: 'PDFToolsHub',
-    title: 'Free Online PDF Tools — No Upload Required | PDFToolsHub',
+    url: 'https://www.dopdfconverter.online',
+    siteName: 'dopdf',
+    title: 'Free PDF Converter Online | dopdf',
     description:
-      'Merge, compress, convert, edit, and sign PDF files directly in your browser. 100% private, client-side processing, zero server uploads, and completely free.',
+      'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
     images: [
       {
-        url: 'https://pdftoolshub.com/og/default.png',
+        url: 'https://www.dopdfconverter.online/og/default.png',
         width: 1200,
         height: 630,
-        alt: 'PDFToolsHub Preview',
+        alt: 'dopdf Preview',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Online PDF Tools — No Upload Required | PDFToolsHub',
+    title: 'Free PDF Converter Online | dopdf',
     description:
-      'Merge, compress, convert, edit, and sign PDF files directly in your browser. 100% private with zero server uploads.',
-    images: ['https://pdftoolshub.com/og/default.png'],
+      'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
+    images: ['https://www.dopdfconverter.online/og/default.png'],
   },
   robots: {
     index: true,

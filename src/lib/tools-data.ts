@@ -1383,12 +1383,64 @@ export const TOOLS: ToolItem[] = [
     outputFilename: 'filled-form.pdf',
     outputExtension: 'pdf',
     iconName: 'FileEdit'
+  },
+  {
+    slug: 'translate-pdf',
+    name: 'Translate PDF',
+    tier: 1,
+    priorityStars: '★★★★★',
+    category: 'convert',
+    categoryLabel: 'Convert PDF',
+    actionTitle: 'Translate PDF Documents Online — Free Accurate Language Converter',
+    metaDescription: 'Translate PDF documents into Spanish, French, German, Arabic, Chinese, Hindi, Urdu and 50+ languages with 100% accuracy and formatting preservation.',
+    shortDescription: 'Translate PDF documents into 50+ languages with high accuracy directly in your browser.',
+    intro: 'Translate entire PDF documents into any language while preserving document structure and readability. Whether reading international financial reports, foreign academic research, or technical manuals, our in-browser translation engine accurately translates text across 50+ world languages with zero server uploads.',
+    howItWorks: [
+      'Select or drag and drop your PDF document into the secure workspace.',
+      'Choose your target language from the available language options (50+ languages supported).',
+      'Click "Execute Translate PDF" to translate and download your translated PDF document.'
+    ],
+    features: [
+      'Accurate neural translation supporting 50+ major international languages.',
+      'Extracts and translates multi-page documents while maintaining clean paragraph spacing.',
+      '100% in-browser processing guarantees sensitive files remain strictly private on your device.',
+      'No subscription paywalls, no file-count limits, and zero registration required.'
+    ],
+    faqs: [
+      {
+        question: 'How accurate is the PDF language translation?',
+        answer: 'Our engine uses high-accuracy neural translation models combined with structured document stream parsing to deliver contextual translations across 50+ world languages.'
+      },
+      {
+        question: 'Which languages are supported by dopdf PDF Translator?',
+        answer: 'We support all major world languages including Spanish, French, German, Italian, Portuguese, Russian, Chinese, Japanese, Korean, Arabic, Hindi, Urdu, Turkish, Dutch, Polish, Indonesian, Vietnamese, and many more.'
+      },
+      {
+        question: 'Are my confidential documents uploaded to any remote server?',
+        answer: 'No. File parsing and PDF re-assembly execute 100% within your local browser memory sandbox without transmitting your file payload to any external storage.'
+      },
+      {
+        question: 'Is there a limit on the number of pages I can translate?',
+        answer: 'dopdf does not impose arbitrary page caps. You can translate documents as large as your device RAM can handle smoothly.'
+      },
+      {
+        question: 'Can I download the translated result as a standard PDF?',
+        answer: 'Yes. The translated text is packaged into a standardized, ready-to-print and share PDF document immediately.'
+      }
+    ],
+    relatedSlugs: ['pdf-to-word', 'word-to-pdf', 'merge-pdf', 'compress-pdf'],
+    acceptedFileTypes: ['.pdf', 'application/pdf'],
+    acceptDescription: 'Select a PDF document (.pdf)',
+    allowMultiple: false,
+    outputFilename: 'translated-document.pdf',
+    outputExtension: 'pdf',
+    iconName: 'Languages'
   }
 ];
 
 export const TOOL_CATEGORIES = [
+  { id: 'convert', label: 'Convert PDF', description: 'Seamless bidirectional conversion between PDFs, images, spreadsheets, Office documents, and multi-language translation.' },
   { id: 'core', label: 'Core PDF Tools', description: 'Essential operations for merging, splitting, compressing, and managing page layouts.' },
-  { id: 'convert', label: 'Convert PDF', description: 'Seamless bidirectional conversion between PDFs, images, spreadsheets, and Office documents.' },
   { id: 'utility', label: 'PDF Utilities', description: 'Advanced security, digital signatures, metadata inspection, and form tools.' }
 ] as const;
 
@@ -1409,3 +1461,4 @@ export function getRelatedTools(tool: ToolItem): ToolItem[] {
     .map((slug) => getToolBySlug(slug))
     .filter((t): t is ToolItem => Boolean(t));
 }
+

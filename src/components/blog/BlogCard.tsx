@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, Clock, ArrowRight, BookOpen } from 'lucide-react';
+import { Calendar, ArrowRight, BookOpen } from 'lucide-react';
 import { BlogPostMeta } from '@/lib/blog';
 
 interface BlogCardProps {
@@ -19,11 +19,6 @@ export default function BlogCard({ post }: BlogCardProps) {
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5 text-zinc-400" />
             <time dateTime={post.date}>{post.date}</time>
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1 text-zinc-400">
-            <Clock className="h-3.5 w-3.5" />
-            {post.readingTime}
           </span>
         </div>
 

@@ -20,7 +20,7 @@ import {
   FileCode,
   Shield,
   ArrowUpRight,
-  Search,
+  Languages,
 } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -32,9 +32,9 @@ import { getAllBlogPosts } from '@/lib/blog';
 import { getHomeStructuredData, SITE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: 'Free Online PDF Tools — No Upload Required | PDFToolsHub',
+  title: 'Free PDF Converter Online | dopdf',
   description:
-    'Merge, compress, convert, and edit PDFs directly in your browser. 100% private, client-side processing, zero server uploads, and completely free.',
+    'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
   alternates: {
     canonical: SITE_URL,
   },
@@ -42,19 +42,19 @@ export const metadata: Metadata = {
 
 const HOME_FAQS = [
   {
-    question: 'How do PDFToolsHub tools work without uploading my files to any server?',
+    question: 'How do dopdf tools work without uploading my files to any server?',
     answer:
-      'Unlike legacy cloud converters that transmit your private files to remote servers, PDFToolsHub runs compiled WebAssembly (WASM) and client-side JavaScript directly within your browser’s V8/JavaScriptCore engine. Your documents are read into local device RAM, manipulated via cryptographic and binary stream APIs, and saved back to your storage without emitting a single byte over the public internet.',
+      'Unlike legacy cloud converters that transmit your private files to remote servers, dopdf runs compiled WebAssembly (WASM) and client-side JavaScript directly within your browser’s V8/JavaScriptCore engine. Your documents are read into local device RAM, manipulated via cryptographic and binary stream APIs, and saved back to your storage without emitting a single byte over the public internet.',
   },
   {
-    question: 'Is PDFToolsHub safe for strictly confidential business, financial, and legal files?',
+    question: 'Is dopdf safe for strictly confidential business, financial, and legal files?',
     answer:
       'Yes, absolutely. Because zero network requests transfer your document payload, there is zero risk of remote data interception, server breaches, or unconsented cloud training. Legal agreements, IRS tax filings, bank statements, and sensitive healthcare records remain 100% within your local browser security sandbox.',
   },
   {
     question: 'Are there hidden charges, quotas, watermarks, or subscription paywalls?',
     answer:
-      'No. All 26 tools across PDFToolsHub are completely free with zero restrictions. We do not brand your pages with watermark stamps, restrict how many documents you can process per day, or require credit cards or account signups.',
+      'No. All 27 tools across dopdf are completely free with zero restrictions. We do not brand your pages with watermark stamps, restrict how many documents you can process per day, or require credit cards or account signups.',
   },
   {
     question: 'What is the maximum document size supported?',
@@ -64,10 +64,10 @@ const HOME_FAQS = [
   {
     question: 'Which file formats and conversions are supported?',
     answer:
-      'Our studio suite features bidirectional conversions across PDF, Microsoft Word (.docx), Microsoft Excel (.xlsx), Microsoft PowerPoint (.pptx), JPG, JPEG, and PNG formats, alongside specialized utilities for cryptographic password protection, digital signatures, and metadata scrubbing.',
+      'Our suite features bidirectional conversions across PDF, Microsoft Word (.docx), Microsoft Excel (.xlsx), Microsoft PowerPoint (.pptx), JPG, JPEG, and PNG formats, alongside specialized utilities for multilingual PDF translation, cryptographic password protection, digital signatures, and metadata scrubbing.',
   },
   {
-    question: 'Does the studio work on mobile devices and tablets without an app?',
+    question: 'Does dopdf work on mobile devices and tablets without an app?',
     answer:
       'Yes. Our responsive WebAssembly interface runs smoothly in Safari on iOS/iPadOS, Chrome on Android, and all modern mobile and desktop web browsers without requiring any App Store downloads.',
   },
@@ -91,12 +91,15 @@ export default function HomePage() {
     })),
   };
 
-  const quickPills = [
-    { name: 'Merge PDF', slug: 'merge-pdf' },
-    { name: 'Compress PDF (-85%)', slug: 'compress-pdf' },
+  const popularConverters = [
     { name: 'PDF to Word', slug: 'pdf-to-word' },
-    { name: 'Sign Document', slug: 'sign-pdf' },
-    { name: 'Protect PDF', slug: 'protect-pdf' },
+    { name: 'Word to PDF', slug: 'word-to-pdf' },
+    { name: 'Translate PDF', slug: 'translate-pdf' },
+    { name: 'PDF to JPG', slug: 'pdf-to-jpg' },
+    { name: 'JPG to PDF', slug: 'jpg-to-pdf' },
+    { name: 'PDF to Excel', slug: 'pdf-to-excel' },
+    { name: 'Merge PDF', slug: 'merge-pdf' },
+    { name: 'Compress PDF', slug: 'compress-pdf' },
   ];
 
   return (
@@ -117,7 +120,7 @@ export default function HomePage() {
       <main className="min-h-screen bg-zinc-50">
         
         {/* =========================================================================
-            SECTION 1: ASYMMETRIC STUDIO COMMAND DECK (HERO)
+            SECTION 1: HERO SECTION
         ========================================================================= */}
         <section className="relative overflow-hidden border-b border-zinc-900 bg-zinc-950 text-white py-16 sm:py-24 lg:py-28">
           <div className="absolute inset-0 bg-studio-grid opacity-25 pointer-events-none" />
@@ -130,42 +133,42 @@ export default function HomePage() {
               <div className="lg:col-span-7 space-y-7">
                 <div className="inline-flex items-center gap-2 rounded-full border border-rose-900/60 bg-rose-950/40 px-3.5 py-1.5 text-xs font-mono font-bold text-rose-400">
                   <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>ISO 32000 PDF ENGINE // 100% IN-MEMORY SANDBOX</span>
+                  <span>FREE ONLINE PDF TOOLS // CLIENT-SIDE PRIVACY</span>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
-                  The Client-Side Document Workstation — <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-rose-300">Zero Cloud Uploads.</span>
+                  Free PDF Converter Online
                 </h1>
 
                 <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
-                  Transform, compress, convert, and sign PDF documents directly within your browser’s local hardware memory. Engineered for maximum enterprise confidentiality, instant speeds, and zero data telemetry.
+                  Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.
                 </p>
 
                 {/* Direct Action Deck */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                   <Link
-                    href="/tools"
+                    href="/tools/pdf-to-word"
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-7 py-4 text-sm sm:text-base font-black text-white shadow-xl shadow-rose-950/40 hover:bg-rose-500 hover:shadow-2xl transition-all active:scale-98 uppercase tracking-wider"
                   >
-                    <span>Launch PDF Studio (26 Tools)</span>
+                    <span>Start Converting</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
 
-                  <a
-                    href="#comparison"
+                  <Link
+                    href="/tools"
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/80 px-6 py-4 text-xs sm:text-sm font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                   >
-                    <span>View Security Architecture</span>
-                  </a>
+                    <span>Explore All PDF Tools</span>
+                  </Link>
                 </div>
 
-                {/* Quick Tool Jump Pills */}
+                {/* Popular PDF Converters Shortcuts */}
                 <div className="pt-4 border-t border-zinc-900/80">
                   <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider block mb-2.5">
-                    Fast Launch Shortcuts:
+                    Popular PDF Converters:
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    {quickPills.map((pill) => (
+                    {popularConverters.map((pill) => (
                       <Link
                         key={pill.slug}
                         href={`/tools/${pill.slug}`}
@@ -178,7 +181,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Right Column: Live WebAssembly Telemetry Console */}
+              {/* Right Column: In-Browser Security & Quick Access Deck */}
               <div className="lg:col-span-5 flex justify-center">
                 <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-900/90 p-6 sm:p-7 shadow-2xl ring-1 ring-white/10 space-y-6">
                   
@@ -189,7 +192,7 @@ export default function HomePage() {
                       <div className="h-3 w-3 rounded-full bg-amber-500" />
                       <div className="h-3 w-3 rounded-full bg-emerald-500" />
                     </div>
-                    <span className="font-mono text-[11px] text-zinc-400">WASM-KERNEL // v2.4</span>
+                    <span className="font-mono text-[11px] text-zinc-400">dopdf // ENGINE v2.4</span>
                   </div>
 
                   {/* Telemetry Readouts */}
@@ -223,16 +226,16 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Interactive Quick Drop Callout */}
+                  {/* Explore All PDF Tools Card */}
                   <Link
-                    href="/tools/compress-pdf"
+                    href="/tools"
                     className="block group rounded-2xl border-2 border-dashed border-zinc-700 hover:border-rose-500 bg-zinc-950/50 p-5 text-center transition-all"
                   >
-                    <p className="text-xs font-bold text-zinc-200 group-hover:text-rose-400 transition-colors">
-                      Drop any PDF here to test Instant Compression →
+                    <p className="text-sm font-bold text-zinc-200 group-hover:text-rose-400 transition-colors">
+                      Explore All PDF Tools (27 Tools) →
                     </p>
-                    <p className="text-[10px] text-zinc-500 font-mono mt-1">
-                      No sign-in · Immediate hardware execution
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      Discover the right PDF tool for your task, all in one place.
                     </p>
                   </Link>
                 </div>
@@ -249,7 +252,7 @@ export default function HomePage() {
           <Container>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-zinc-100">
               <div className="pt-3 md:pt-0">
-                <p className="text-3xl sm:text-4xl font-black text-zinc-950 font-mono">26</p>
+                <p className="text-3xl sm:text-4xl font-black text-zinc-950 font-mono">27</p>
                 <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mt-1 font-mono">
                   Client Utilities
                 </p>
@@ -280,16 +283,16 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            SECTION 3: BENTO SUITE MATRIX (TIER 1 POPULAR TOOLS)
+            SECTION 3: POPULAR CONVERTERS MATRIX
         ========================================================================= */}
         <section id="popular" className="py-16 sm:py-24 bg-zinc-50 border-b border-zinc-200 scroll-mt-20">
           <Container>
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
               <div>
                 <SectionHeading
-                  badge="ENTERPRISE WORKFLOWS"
-                  title="Most Demanded Document Suites"
-                  subtitle="Battle-tested utilities designed for everyday document consolidation, compression, and format interchange."
+                  badge="POPULAR CONVERTERS"
+                  title="Featured PDF Conversion Tools"
+                  subtitle="Convert documents quickly and securely with high-precision browser-based conversion engines."
                   className="mb-0"
                 />
               </div>
@@ -297,7 +300,7 @@ export default function HomePage() {
                 href="/tools"
                 className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider"
               >
-                <span>Browse All 26 Tools Directory</span>
+                <span>Browse All 27 Tools Directory</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -305,105 +308,103 @@ export default function HomePage() {
             {/* Bento Grid Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               
-              {/* Highlight Card 1: Merge Studio */}
+              {/* Highlight Card 1: PDF to Word */}
               <Link
-                href="/tools/merge-pdf"
+                href="/tools/pdf-to-word"
                 className="group md:col-span-2 lg:col-span-2 relative rounded-3xl border border-zinc-200 bg-white p-7 sm:p-9 shadow-xs hover:border-zinc-900 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white group-hover:bg-rose-600 transition-colors">
-                      <Layers className="h-6 w-6" />
+                      <FileText className="h-6 w-6" />
                     </div>
                     <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                      ★ TIER 1 CORE SUITE
+                      ★ TOP CONVERSION ENGINE
                     </span>
                   </div>
 
                   <h3 className="text-2xl font-black text-zinc-950 group-hover:text-rose-600 transition-colors">
-                    Merge & Combine Multiple PDFs
+                    Convert PDF to Word (.docx)
                   </h3>
                   <p className="mt-3 text-sm text-zinc-600 leading-relaxed max-w-xl">
-                    Seamlessly concatenate invoices, agreements, and slide decks into a single pristine document with custom drag-and-drop page ordering. Runs 100% locally.
+                    Extract paragraphs, typography, and structural content into fully editable Microsoft Word documents directly in your browser. Fast, accurate, and completely confidential.
                   </p>
 
                   {/* Simulated Workflow Badges */}
                   <div className="mt-6 flex flex-wrap items-center gap-2">
                     <span className="text-xs font-mono bg-zinc-100 text-zinc-700 px-3 py-1 rounded-lg border border-zinc-200">
-                      doc1.pdf + doc2.pdf
+                      document.pdf
                     </span>
                     <span className="text-zinc-400 font-bold">→</span>
                     <span className="text-xs font-mono bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200 font-bold">
-                      combined.pdf
+                      editable-document.docx
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-8 pt-4 border-t border-zinc-100 flex items-center justify-between text-xs font-bold text-zinc-500 group-hover:text-zinc-950">
-                  <span className="font-mono">NO FILE COUNT RESTRICTION</span>
+                  <span className="font-mono">PRESERVES TEXT & LAYOUT</span>
                   <span className="inline-flex items-center gap-1 text-rose-600">
-                    Open Merge Studio <ArrowUpRight className="h-4 w-4" />
+                    Open PDF to Word <ArrowUpRight className="h-4 w-4" />
                   </span>
                 </div>
               </Link>
 
-              {/* Highlight Card 2: High Ratio Compression */}
+              {/* Highlight Card 2: PDF Language Converter */}
               <Link
-                href="/tools/compress-pdf"
+                href="/tools/translate-pdf"
                 className="group relative rounded-3xl border border-zinc-200 bg-white p-7 sm:p-9 shadow-xs hover:border-zinc-900 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white group-hover:bg-rose-600 transition-colors">
-                      <Minimize2 className="h-6 w-6" />
+                      <Languages className="h-6 w-6" />
                     </div>
                     <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      UP TO -85%
+                      50+ LANGUAGES
                     </span>
                   </div>
 
                   <h3 className="text-2xl font-black text-zinc-950 group-hover:text-rose-600 transition-colors">
-                    Compress PDF
+                    Translate PDF
                   </h3>
                   <p className="mt-3 text-sm text-zinc-600 leading-relaxed">
-                    Shrink massive PDF files for email attachments without losing vector clarity. Flattens unused stream dictionaries instantly.
+                    Translate entire PDF documents across languages while preserving structure and generating clean PDF outputs.
                   </p>
 
                   <div className="mt-6 p-3 rounded-xl bg-zinc-50 border border-zinc-200 text-xs font-mono flex items-center justify-between">
-                    <span className="text-zinc-400">12.4 MB</span>
-                    <span className="font-bold text-rose-600 font-sans">Reduced by 82%</span>
-                    <span className="text-emerald-600 font-bold">2.2 MB</span>
+                    <span className="text-zinc-400">English PDF</span>
+                    <span className="font-bold text-rose-600 font-sans">Multi-lingual AI</span>
+                    <span className="text-emerald-600 font-bold">Spanish, French...</span>
                   </div>
                 </div>
 
                 <div className="mt-8 pt-4 border-t border-zinc-100 flex items-center justify-between text-xs font-bold text-zinc-500 group-hover:text-zinc-950">
-                  <span className="font-mono">LOSSLESS OPTIMIZER</span>
+                  <span className="font-mono">NEURAL TRANSLATION</span>
                   <span className="inline-flex items-center gap-1 text-rose-600">
-                    Compress Now <ArrowUpRight className="h-4 w-4" />
+                    Translate Now <ArrowUpRight className="h-4 w-4" />
                   </span>
                 </div>
               </Link>
 
               {/* Complementary Tools Grid */}
-              {tier1Tools.slice(2, 6).map((tool) => (
-                <ToolCard key={tool.slug} tool={tool} />
-              ))}
-
-              {/* Additional Tool Card for JPG to PDF */}
-              {tier1Tools[6] && <ToolCard tool={tier1Tools[6]} />}
+              {tier1Tools.map((tool) => {
+                if (tool.slug === 'pdf-to-word' || tool.slug === 'translate-pdf') return null;
+                return <ToolCard key={tool.slug} tool={tool} />;
+              })}
             </div>
           </Container>
         </section>
 
         {/* =========================================================================
-            SECTION 4: COMPLETE DIRECTORY BY ARCHITECTURE WING
+            SECTION 4: COMPLETE DIRECTORY BY CATEGORY
         ========================================================================= */}
         <section className="py-16 sm:py-24 bg-white border-b border-zinc-200">
           <Container>
             <SectionHeading
-              badge="FULL 26-MODULE CATALOG"
+              badge="FULL 27-MODULE CATALOG"
               title="All PDF Utilities by Category"
-              subtitle="Every tool runs with 100% client-side memory safety, zero subscriptions, and complete offline capability."
+              subtitle="Every tool runs with 100% client-side memory safety, zero subscriptions, and complete confidentiality."
               centered
             />
 
@@ -419,7 +420,7 @@ export default function HomePage() {
                       <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
                         <div>
                           <span className="font-mono text-xs font-bold text-rose-600 uppercase">
-                            WING 0{index + 1}
+                            SECTION 0{index + 1}
                           </span>
                           <h3 className="text-xl font-black text-zinc-950 mt-0.5">
                             {category.label}
@@ -467,7 +468,7 @@ export default function HomePage() {
             <SectionHeading
               badge="SECURITY BENCHMARK"
               title="Why Client-Side WASM Beats Cloud SaaS"
-              subtitle="Understand the critical architectural differences between PDFToolsHub and traditional upload-based services like Smallpdf or iLovePDF."
+              subtitle="Understand the critical architectural differences between dopdf and traditional upload-based services like Smallpdf or iLovePDF."
               centered
               className="text-white [&_h2]:text-white [&_p]:text-zinc-400"
             />
@@ -475,7 +476,7 @@ export default function HomePage() {
             <div className="max-w-4xl mx-auto rounded-3xl border border-zinc-800 bg-zinc-900/90 overflow-hidden shadow-2xl mt-12">
               <div className="grid grid-cols-12 bg-zinc-950 p-4 sm:p-5 border-b border-zinc-800 text-xs font-mono font-bold text-zinc-400">
                 <div className="col-span-5 sm:col-span-4 uppercase">Feature / Vector</div>
-                <div className="col-span-4 sm:col-span-4 text-rose-400 uppercase">PDFToolsHub (Local)</div>
+                <div className="col-span-4 sm:col-span-4 text-rose-400 uppercase">dopdf (Local)</div>
                 <div className="col-span-3 sm:col-span-4 text-zinc-500 uppercase">Cloud SaaS Converters</div>
               </div>
 
@@ -537,8 +538,8 @@ export default function HomePage() {
               <div>
                 <SectionHeading
                   badge="KNOWLEDGE REPOSITORY"
-                  title="PDF Engineering & Format Guides"
-                  subtitle="In-depth tutorials, file format specifications, and privacy best-practices written by engineers."
+                  title="PDF Guides & Format Documentation"
+                  subtitle="In-depth tutorials, file format specifications, and document workflows."
                   className="mb-0"
                 />
               </div>
@@ -590,14 +591,14 @@ export default function HomePage() {
                 Ready to Process Documents with Complete Privacy?
               </h2>
               <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
-                Choose any of our 26 specialized tools. No downloads, no subscriptions, and zero file uploads.
+                Choose any of our 27 specialized tools. No downloads, no subscriptions, and zero file uploads.
               </p>
               <div className="pt-2">
                 <Link
                   href="/tools"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-8 py-4 text-sm sm:text-base font-black text-white shadow-xl shadow-rose-950/40 hover:bg-rose-500 transition-all active:scale-98 uppercase tracking-wider"
                 >
-                  <span>Explore Complete Tool Directory</span>
+                  <span>Explore All PDF Tools</span>
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </div>

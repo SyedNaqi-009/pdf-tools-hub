@@ -52,6 +52,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [password, setPassword] = useState('');
   const [pageOrder, setPageOrder] = useState('1, 2');
+  const [targetLang, setTargetLang] = useState('es');
   const [metadataInfo, setMetadataInfo] = useState<Record<string, string | number> | null>(null);
 
   // Signature Canvas
@@ -424,6 +425,14 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
           break;
         }
 
+        case 'translate-pdf': {
+          const { translatePdf } = await import('@/lib/pdf/translate');
+          const blob = await translatePdf(files[0], targetLang, updateProgress);
+          setResultBlob(blob);
+          setResultFilename(`translated-${targetLang}-${files[0].name}`);
+          break;
+        }
+
         default:
           throw new Error('Action handler not implemented for this tool.');
       }
@@ -713,6 +722,48 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                           />
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* PDF Language Translation */}
+                  {tool.slug === 'translate-pdf' && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
+                        Target Language:
+                      </label>
+                      <select
+                        value={targetLang}
+                        onChange={(e) => setTargetLang(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 focus:border-zinc-900 focus:outline-hidden"
+                      >
+                        <option value="es">Spanish (Español)</option>
+                        <option value="fr">French (Français)</option>
+                        <option value="de">German (Deutsch)</option>
+                        <option value="it">Italian (Italiano)</option>
+                        <option value="pt">Portuguese (Português)</option>
+                        <option value="ru">Russian (Русский)</option>
+                        <option value="zh-CN">Chinese (Simplified)</option>
+                        <option value="ja">Japanese (日本語)</option>
+                        <option value="ko">Korean (한국어)</option>
+                        <option value="ar">Arabic (العربية)</option>
+                        <option value="hi">Hindi (हिन्दी)</option>
+                        <option value="ur">Urdu (اردو)</option>
+                        <option value="tr">Turkish (Türkçe)</option>
+                        <option value="nl">Dutch (Nederlands)</option>
+                        <option value="pl">Polish (Polski)</option>
+                        <option value="id">Indonesian (Bahasa Indonesia)</option>
+                        <option value="vi">Vietnamese (Tiếng Việt)</option>
+                        <option value="en">English</option>
+                        <option value="sv">Swedish (Svenska)</option>
+                        <option value="el">Greek (Ελληνικά)</option>
+                        <option value="cs">Czech (Čeština)</option>
+                        <option value="ro">Romanian (Română)</option>
+                        <option value="th">Thai (ไทย)</option>
+                        <option value="bn">Bengali (বাংলা)</option>
+                      </select>
+                      <p className="text-xs text-zinc-500 font-mono">
+                        Extracts text stream and generates a translated, clean formatted PDF.
+                      </p>
                     </div>
                   )}
 

@@ -26,6 +26,7 @@ import {
   LayoutGrid,
   Eye,
   FileEdit,
+  Languages,
   ArrowRight,
   LucideIcon,
   Sparkles,
@@ -58,6 +59,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   LayoutGrid,
   Eye,
   FileEdit,
+  Languages,
 };
 
 interface ToolCardProps {

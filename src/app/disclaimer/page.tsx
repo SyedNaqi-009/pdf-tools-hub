@@ -5,7 +5,7 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { generatePageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = generatePageMetadata(
-  'Disclaimer — Tool Limitations & No-Warranty Notice | PDFToolsHub',
+  'Disclaimer — Tool Limitations & No-Warranty Notice | dopdf',
   'Review our legal disclaimer regarding file conversion fidelity, client-side software accuracy, and warranty limitations.',
   '/disclaimer'
 );
@@ -13,7 +13,7 @@ export const metadata: Metadata = generatePageMetadata(
 export default function DisclaimerPage() {
   return (
     <main className="min-h-screen bg-zinc-50 pb-24">
-      {/* Studio Header Hero */}
+      {/* Header Hero */}
       <div className="border-b border-zinc-900 bg-zinc-950 text-white py-12 sm:py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-studio-grid opacity-25 pointer-events-none" />
         <Container className="relative">
@@ -37,10 +37,10 @@ export default function DisclaimerPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">1. &quot;As-Is&quot; and &quot;As-Available&quot; Provision</h2>
             <p>
-              The information, software tools, and services provided on PDFToolsHub (accessible at pdftoolshub.com) are offered on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis, without warranties of any kind, whether express, implied, statutory, or otherwise.
+              The information, software tools, and services provided on dopdf (accessible at dopdfconverter.online) are offered on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis, without warranties of any kind, whether express, implied, statutory, or otherwise.
             </p>
             <p>
-              To the fullest extent permissible pursuant to applicable law, PDFToolsHub disclaims all warranties, express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement, and title.
+              To the fullest extent permissible pursuant to applicable law, dopdf disclaims all warranties, express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement, and title.
             </p>
           </section>
 
@@ -50,7 +50,7 @@ export default function DisclaimerPage() {
               While our engineering team works diligently to ensure high fidelity across all document operations, PDF conversion and parsing inherently involve complex document object hierarchies, proprietary font subsets, custom vector paths, and differing typography engines.
             </p>
             <p>
-              Consequently, PDFToolsHub does not guarantee that:
+              Consequently, dopdf does not guarantee that:
             </p>
             <ul className="list-disc list-inside space-y-1.5 ml-2 font-mono text-xs sm:text-sm text-zinc-600">
               <li>Document conversions (such as PDF to Word, PDF to Excel, or Word to PDF) will achieve 100% pixel-perfect or format-identical reproduction of original designs.</li>
@@ -65,7 +65,7 @@ export default function DisclaimerPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">3. No Legal, Financial, or Professional Advice</h2>
             <p>
-              The content published on our blog, tutorials, guides, and tool pages is provided for general informational and educational purposes only. Nothing on PDFToolsHub should be construed as legal advice, compliance certification, tax guidance, or professional counsel.
+              The content published on our blog, tutorials, guides, and tool pages is provided for general informational and educational purposes only. Nothing on dopdf should be construed as legal advice, compliance certification, tax guidance, or professional counsel.
             </p>
             <p>
               While digital signatures created using our Sign PDF tool are recognized under general electronic signature statutes (such as the US ESIGN Act or EU eIDAS), you are solely responsible for verifying the legal acceptability of electronic signatures for your specific transaction or jurisdiction.
@@ -75,7 +75,7 @@ export default function DisclaimerPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">4. User Responsibility for Data Backups</h2>
             <p>
-              Because all processing is executed client-side in your browser memory, PDFToolsHub does not maintain copies or backups of your files. You are solely responsible for maintaining backup copies of all original source files prior to performing operations like page deletion, splitting, metadata stripping, or reordering.
+              Because all processing is executed client-side in your browser memory, dopdf does not maintain copies or backups of your files. You are solely responsible for maintaining backup copies of all original source files prior to performing operations like page deletion, splitting, metadata stripping, or reordering.
             </p>
           </section>
 
@@ -85,8 +85,8 @@ export default function DisclaimerPage() {
               If you have any questions regarding this Disclaimer, please reach out to our team at:
             </p>
             <p className="font-mono text-xs sm:text-sm text-zinc-900 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
-              Email: support@pdftoolshub.com<br />
-              Inquiries: pdftoolshub.com/contact
+              Email: support@dopdfconverter.online<br />
+              Inquiries: dopdfconverter.online/contact
             </p>
           </section>
         </div>

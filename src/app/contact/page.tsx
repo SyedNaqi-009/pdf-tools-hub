@@ -17,12 +17,12 @@ const SUPPORT_FAQS = [
     answer: 'Because all processing happens in your device local RAM, documents with thousands of high-resolution images require sufficient available system memory. For exceptionally large files (over 200MB), close other background browser tabs to free up RAM.',
   },
   {
-    question: 'Are PDFToolsHub tools completely free for commercial and enterprise use?',
-    answer: 'Yes. All 26 tools are completely free for personal, educational, and commercial purposes with zero licensing fees or subscription requirements.',
+    question: 'Are dopdf tools completely free for commercial and enterprise use?',
+    answer: 'Yes. All 27 tools are completely free for personal, educational, and commercial purposes with zero licensing fees or subscription requirements.',
   },
   {
     question: 'Do you offer an enterprise desktop version or offline software?',
-    answer: 'Because PDFToolsHub is a Progressive Web Application that executes locally, you can use our web tools anytime your browser is open. In fact, after the initial page load, our tools continue to process files even if your internet connection is temporarily disconnected!',
+    answer: 'Because dopdf is a Progressive Web Application that executes locally, you can use our web tools anytime your browser is open. In fact, after the initial page load, our tools continue to process files even if your internet connection is temporarily disconnected!',
   },
 ];
 
@@ -182,7 +182,7 @@ export default function ContactPage() {
                   <div>
                     <p className="font-bold text-zinc-900">Direct Email</p>
                     <p className="text-xs text-zinc-500 mt-0.5 font-mono">
-                      support@pdftoolshub.com
+                      support@dopdfconverter.online
                     </p>
                   </div>
                 </div>

@@ -5,15 +5,15 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { generatePageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = generatePageMetadata(
-  'Terms & Conditions | PDFToolsHub',
-  'Review the terms of use, intellectual property guidelines, and conditions for using PDFToolsHub free online PDF utilities.',
+  'Terms & Conditions | dopdf',
+  'Review the terms of use, intellectual property guidelines, and conditions for using dopdf free online PDF utilities.',
   '/terms'
 );
 
 export default function TermsPage() {
   return (
     <main className="min-h-screen bg-zinc-50 pb-24">
-      {/* Studio Header Hero */}
+      {/* Header Hero */}
       <div className="border-b border-zinc-900 bg-zinc-950 text-white py-12 sm:py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-studio-grid opacity-25 pointer-events-none" />
         <Container className="relative">
@@ -37,21 +37,21 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using PDFToolsHub (the &quot;Service&quot;, available at pdftoolshub.com), you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must refrain from using the Service.
+              By accessing and using dopdf (the &quot;Service&quot;, available at dopdfconverter.online), you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must refrain from using the Service.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">2. Description of the Service</h2>
             <p>
-              PDFToolsHub provides free, browser-based PDF utility tools, including merging, splitting, compressing, converting, editing, rotating, signing, and securing PDF documents. All processing is executed client-side within your web browser without uploading files to our servers.
+              dopdf provides free, browser-based PDF utility tools, including merging, splitting, compressing, converting, editing, rotating, signing, and securing PDF documents. All processing is executed client-side within your web browser without uploading files to our servers.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">3. Acceptable Use Policy</h2>
             <p>
-              You agree to use PDFToolsHub solely for lawful purposes. You represent and warrant that:
+              You agree to use dopdf solely for lawful purposes. You represent and warrant that:
             </p>
             <ul className="list-disc list-inside space-y-1.5 ml-2 font-mono text-xs sm:text-sm text-zinc-600">
               <li>You possess all necessary rights, titles, and permissions to the documents you process using our tools.</li>
@@ -64,17 +64,17 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">4. Intellectual Property Rights</h2>
             <p>
-              <strong>Your Documents:</strong> You retain 100% full and unencumbered ownership of all documents, images, and files you process on PDFToolsHub. Because your files are never uploaded to our servers, we claim zero ownership, license, or rights to your content.
+              <strong>Your Documents:</strong> You retain 100% full and unencumbered ownership of all documents, images, and files you process on dopdf. Because your files are never uploaded to our servers, we claim zero ownership, license, or rights to your content.
             </p>
             <p>
-              <strong>Our Platform:</strong> The visual interface, branding, code, documentation, logos, and design of PDFToolsHub are the exclusive property of PDFToolsHub and are protected by applicable copyright and trademark laws.
+              <strong>Our Platform:</strong> The visual interface, branding, code, documentation, logos, and design of dopdf are the exclusive property of dopdf and are protected by applicable copyright and trademark laws.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-black text-zinc-950">5. Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, PDFToolsHub, its operators, creators, and affiliates shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising out of your access to, use of, or inability to use the Service.
+              To the fullest extent permitted by law, dopdf, its operators, creators, and affiliates shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising out of your access to, use of, or inability to use the Service.
             </p>
             <p>
               This includes, without limitation, damages for loss of profits, loss of data, document corruption, business interruption, or any other commercial damages or losses, even if advised of the possibility thereof.
@@ -87,8 +87,8 @@ export default function TermsPage() {
               If you have any questions or concerns regarding these Terms and Conditions, please contact us at:
             </p>
             <p className="font-mono text-xs sm:text-sm text-zinc-900 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
-              Email: support@pdftoolshub.com<br />
-              Website: pdftoolshub.com/contact
+              Email: support@dopdfconverter.online<br />
+              Website: dopdfconverter.online/contact
             </p>
           </section>
         </div>

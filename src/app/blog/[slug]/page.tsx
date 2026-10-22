@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImage = post.featuredImage || `${SITE_URL}/og/${slug}.png`;
 
   return {
-    title: `${post.title} | PDFToolsHub`,
+    title: `${post.title} | dopdf`,
     description: post.description,
     alternates: {
       canonical,
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: post.title,
       description: post.description,
       url: canonical,
-      siteName: 'PDFToolsHub',
+      siteName: 'dopdf',
       type: 'article',
       publishedTime: post.date,
       authors: [post.author],

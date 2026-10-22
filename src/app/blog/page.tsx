@@ -8,7 +8,7 @@ import { getAllBlogPosts } from '@/lib/blog';
 import { generatePageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = generatePageMetadata(
-  'PDF Guides, Tutorials & Productivity Tips | PDFToolsHub Blog',
+  'PDF Guides, Tutorials & Productivity Tips | dopdf Blog',
   'Read our comprehensive step-by-step guides on merging, compressing, converting, editing, and securing PDF documents online.',
   '/blog'
 );

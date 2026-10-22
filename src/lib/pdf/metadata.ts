@@ -65,7 +65,7 @@ export async function removePdfMetadata(
   cleanPdf.setAuthor('');
   cleanPdf.setSubject('');
   cleanPdf.setKeywords([]);
-  cleanPdf.setProducer('PDFToolsHub Privacy Sanitizer');
+  cleanPdf.setProducer('dopdf Privacy Sanitizer');
   cleanPdf.setCreator('');
 
   onProgress?.(85, 'Saving sanitized document streams...');
