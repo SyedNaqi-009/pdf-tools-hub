@@ -42,6 +42,40 @@ export default function Navbar() {
     setIsDropdownOpen(false);
   }, [pathname]);
 
+  // Prevent background scrolling when mobile drawer is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMobileMenuOpen]);
+
+  // Close dropdown on click outside or escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false);
+        setIsMobileMenuOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDropdownOpen]);
+
   const toggleMobileCategory = (catId: string) => {
     setIsMobileCategoryOpen((prev) => ({
       ...prev,
@@ -107,12 +141,10 @@ export default function Navbar() {
               <span>Home</span>
             </Link>
 
-            {/* Mega Dropdown for PDF Tools */}
+            {/* Mega Dropdown for PDF Tools (Click to Toggle) */}
             <div
               className="static"
               ref={dropdownRef}
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              onMouseLeave={() => setIsDropdownOpen(false)}
             >
               <button
                 type="button"
@@ -245,7 +277,7 @@ export default function Navbar() {
       {/* Mobile Drawer Backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs md:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/75 backdrop-blur-xs md:hidden transition-opacity touch-none overscroll-contain"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-hidden="true"
         />
@@ -253,11 +285,11 @@ export default function Navbar() {
 
       {/* Mobile Drawer (Slide-out) */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[320px] sm:max-w-sm bg-zinc-950 text-white border-l border-zinc-800 shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[320px] sm:max-w-sm bg-zinc-950 text-white border-l border-zinc-800 shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col overscroll-contain ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-zinc-800 px-5">
+        <div className="flex h-16 items-center justify-between border-b border-zinc-800 px-5 shrink-0">
           <Link
             href="/"
             onClick={() => setIsMobileMenuOpen(false)}
@@ -284,7 +316,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 space-y-5">
           {/* Mobile Home Link */}
           <Link
             href="/"

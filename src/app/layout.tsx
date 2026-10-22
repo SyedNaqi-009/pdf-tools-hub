@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place with zero server uploads.',
   icons: {
     icon: [
+      { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-48.png', sizes: '48x48', type: 'image/png' },
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/icon.png', sizes: '512x512', type: 'image/png' },
-      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
     ],
     shortcut: ['/favicon.ico'],
     apple: [
       { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
-      { url: '/logo.png' },
     ],
   },
   keywords: [

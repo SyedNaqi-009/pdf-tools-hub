@@ -18,7 +18,7 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="shrink-0 group-hover:scale-105 transition-transform duration-200">
-            <ToolLogo slug={tool.slug} size={42} />
+            <ToolLogo slug={tool.slug} size={44} />
           </div>
           <div className="min-w-0">
             <span className="truncate text-sm font-bold text-zinc-900 group-hover:text-blue-600 block">
@@ -40,10 +40,10 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
       className="group relative flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-blue-500 hover:shadow-xl"
     >
       <div>
-        {/* Top Header: iLovePDF Style Tool Logo & Badge */}
+        {/* Top Header: FreePDFConvert / iLovePDF Style Tool Logo & Badge */}
         <div className="flex items-start justify-between gap-4 mb-4">
-          <div className="group-hover:scale-105 transition-transform duration-200 drop-shadow-xs">
-            <ToolLogo slug={tool.slug} size={54} />
+          <div className="group-hover:scale-105 transition-transform duration-200 drop-shadow-sm">
+            <ToolLogo slug={tool.slug} size={58} />
           </div>
 
           <div className="flex items-center gap-1.5">

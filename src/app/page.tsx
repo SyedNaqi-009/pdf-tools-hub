@@ -168,12 +168,23 @@ export default function HomePage() {
                 <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-900/90 p-6 shadow-2xl ring-1 ring-white/10 space-y-5">
                   
                   {/* Console Header */}
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <img src="/icon.png" alt="DoPDF" className="h-7 w-7 object-contain drop-shadow-sm" />
-                      <span className="font-bold text-sm text-white">Do<span className="text-blue-500">PDF</span></span>
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-950 p-1 border border-zinc-800 shadow-inner">
+                        <img src="/navbar-logo.png" alt="DoPDF" className="h-full w-full object-contain drop-shadow-md" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-black text-xl sm:text-2xl text-white tracking-tight leading-none">
+                          Do<span className="text-blue-500">PDF</span>
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-400 font-bold uppercase tracking-wider mt-1">
+                          Private Sandbox
+                        </span>
+                      </div>
                     </div>
-                    <span className="font-mono text-[11px] text-zinc-400">ENGINE v2.4 // READY</span>
+                    <span className="font-mono text-xs text-zinc-300 bg-zinc-950 px-2.5 py-1 rounded-lg border border-zinc-800 font-bold">
+                      ENGINE v2.4 // READY
+                    </span>
                   </div>
 
                   {/* Telemetry Readouts */}
