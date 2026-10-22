@@ -74,11 +74,11 @@ export default function Navbar() {
               className="flex items-center gap-2.5 group"
               aria-label="dopdf Home"
             >
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-md shadow-blue-950/40 group-hover:scale-105 transition-transform duration-200">
+              <div className="relative flex h-11 w-11 items-center justify-center group-hover:scale-105 transition-transform duration-200">
                 <img
-                  src="/logo.png"
+                  src="/icon.png"
                   alt="DoPDF Logo"
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-contain drop-shadow-md"
                 />
               </div>
               <div className="flex flex-col">
@@ -263,11 +263,11 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex items-center gap-2.5 text-base font-bold text-white"
           >
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm">
+            <div className="relative flex h-9 w-9 items-center justify-center">
               <img
-                src="/logo.png"
+                src="/icon.png"
                 alt="DoPDF Logo"
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain drop-shadow-sm"
               />
             </div>
             <span className="text-lg font-black tracking-tight text-white">

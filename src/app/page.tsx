@@ -171,7 +171,7 @@ export default function HomePage() {
                   {/* Console Header */}
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
                     <div className="flex items-center gap-2.5">
-                      <img src="/logo.png" alt="DoPDF" className="h-6 w-6 object-contain" />
+                      <img src="/icon.png" alt="DoPDF" className="h-7 w-7 object-contain drop-shadow-sm" />
                       <span className="font-bold text-sm text-white">Do<span className="text-blue-500">PDF</span></span>
                     </div>
                     <span className="font-mono text-[11px] text-zinc-400">ENGINE v2.4 // READY</span>

@@ -474,7 +474,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
             <div className="max-w-4xl space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-rose-950/80 px-2.5 py-1 text-[11px] font-mono font-bold text-rose-400 border border-rose-900/60 uppercase">
+                <span className="rounded-md bg-blue-950/80 px-2.5 py-1 text-[11px] font-mono font-bold text-blue-400 border border-blue-900/60 uppercase">
                   {tool.categoryLabel}
                 </span>
                 <span className="rounded-md bg-zinc-900 px-2.5 py-1 text-[11px] font-mono text-zinc-400 border border-zinc-800">
@@ -772,7 +772,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                     <button
                       type="button"
                       onClick={handleExecute}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-6 py-4 text-sm font-black text-white shadow-lg shadow-rose-950/20 hover:bg-rose-500 transition-all cursor-pointer active:scale-98 uppercase tracking-wider"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-sm font-black text-white shadow-lg shadow-blue-950/20 hover:bg-blue-500 transition-all cursor-pointer active:scale-98 uppercase tracking-wider"
                     >
                       <Play className="h-4 w-4 fill-current" />
                       <span>Execute {tool.name}</span>
