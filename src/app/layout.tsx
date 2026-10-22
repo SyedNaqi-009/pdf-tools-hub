@@ -18,21 +18,49 @@ export const metadata: Metadata = {
     template: '%s | dopdf',
   },
   description:
-    'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
+    'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place with zero server uploads.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
+      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: ['/favicon.ico'],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logo.png' },
+    ],
+  },
   keywords: [
     'dopdf',
-    'free PDF converter',
-    'PDF converter online',
-    'PDF to Word',
-    'Word to PDF',
-    'translate PDF',
-    'PDF language converter',
-    'merge PDF',
-    'compress PDF',
-    'split PDF',
-    'convert PDF',
-    'sign PDF',
-    'client side PDF',
+    'dopdfconverter',
+    'dopdf online',
+    'free PDF converter online',
+    'best PDF converter 2026',
+    'PDF to Word converter free',
+    'Word to PDF converter',
+    'translate PDF online',
+    'PDF language translator',
+    'merge PDF online free',
+    'compress PDF without losing quality',
+    'split PDF pages free',
+    'PDF to JPG high resolution',
+    'JPG to PDF maker',
+    'PDF to Excel converter',
+    'Excel to PDF',
+    'sign PDF online free',
+    'password protect PDF',
+    'unlock PDF password remover',
+    'edit PDF online free no watermark',
+    'client side private PDF tools',
+    'no upload PDF converter',
+    '#dopdf',
+    '#pdfconverter',
+    '#freepdf',
+    '#pdftoword',
+    '#mergepdf',
+    '#compresspdf',
+    '#translatepdf',
   ],
   authors: [{ name: 'dopdf' }],
   creator: 'dopdf',
@@ -52,10 +80,10 @@ export const metadata: Metadata = {
       'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
     images: [
       {
-        url: 'https://www.dopdfconverter.online/og/default.png',
-        width: 1200,
-        height: 630,
-        alt: 'dopdf Preview',
+        url: 'https://www.dopdfconverter.online/logo.png',
+        width: 1024,
+        height: 1024,
+        alt: 'dopdf Logo',
       },
     ],
   },
@@ -64,7 +92,7 @@ export const metadata: Metadata = {
     title: 'Free PDF Converter Online | dopdf',
     description:
       'Convert PDF files online with easy-to-use tools for supported formats. Explore PDF converters and useful PDF utilities in one convenient place.',
-    images: ['https://www.dopdfconverter.online/og/default.png'],
+    images: ['https://www.dopdfconverter.online/logo.png'],
   },
   robots: {
     index: true,
@@ -77,6 +105,15 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  other: {
+    'geo.region': 'US',
+    'geo.placename': 'Global',
+    'geo.position': '37.7749;-122.4194',
+    'ICBM': '37.7749, -122.4194',
+    'rating': 'general',
+    'distribution': 'global',
+    'revisit-after': '1 days',
+  },
 };
 
 export default function RootLayout({
@@ -86,11 +123,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon.png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+      </head>
       <body className="min-h-screen flex flex-col font-sans antialiased text-zinc-950 bg-zinc-50">
         {/* Skip to Content for Accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white shadow-lg focus:outline-hidden"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg focus:outline-hidden"
         >
           Skip to main content
         </a>

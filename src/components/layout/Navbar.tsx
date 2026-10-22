@@ -74,13 +74,16 @@ export default function Navbar() {
               className="flex items-center gap-2.5 group"
               aria-label="dopdf Home"
             >
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-md shadow-rose-950/50 group-hover:scale-105 transition-transform duration-200">
-                <FileText className="h-5 w-5" />
-                <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-zinc-950" title="100% In-Memory Sandbox" />
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-md shadow-blue-950/40 group-hover:scale-105 transition-transform duration-200">
+                <img
+                  src="/logo.png"
+                  alt="DoPDF Logo"
+                  className="h-full w-full object-contain"
+                />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-white leading-tight lowercase">
-                  do<span className="text-rose-500">pdf</span>
+                <span className="text-xl font-black tracking-tight text-white leading-tight">
+                  Do<span className="text-blue-500">PDF</span>
                 </span>
                 <span className="text-[10px] font-mono text-zinc-400 tracking-wider flex items-center gap-1">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -220,7 +223,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/tools"
-              className="hidden lg:inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-500 transition-colors uppercase tracking-wider"
+              className="hidden lg:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-500 transition-colors uppercase tracking-wider"
             >
               <span>PDF Tools</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -258,13 +261,17 @@ export default function Navbar() {
           <Link
             href="/"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2 text-base font-bold text-white"
+            className="flex items-center gap-2.5 text-base font-bold text-white"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600 text-white">
-              <FileText className="h-4 w-4" />
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm">
+              <img
+                src="/logo.png"
+                alt="DoPDF Logo"
+                className="h-full w-full object-contain"
+              />
             </div>
-            <span className="text-lg font-black tracking-tight text-white lowercase">
-              do<span className="text-rose-500">pdf</span>
+            <span className="text-lg font-black tracking-tight text-white">
+              Do<span className="text-blue-500">PDF</span>
             </span>
           </Link>
           <button

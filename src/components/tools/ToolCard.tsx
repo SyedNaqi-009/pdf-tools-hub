@@ -77,11 +77,11 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
         className="group flex items-center justify-between rounded-xl border border-zinc-200/80 bg-white p-3.5 transition-all hover:border-zinc-900 hover:shadow-sm"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-800 transition-colors group-hover:bg-rose-600 group-hover:text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-800 transition-colors group-hover:bg-blue-600 group-hover:text-white">
             <IconComponent className="h-4.5 w-4.5" />
           </div>
           <div className="min-w-0">
-            <span className="truncate text-sm font-bold text-zinc-900 group-hover:text-rose-600 block">
+            <span className="truncate text-sm font-bold text-zinc-900 group-hover:text-blue-600 block">
               {tool.name}
             </span>
             <span className="text-[11px] text-zinc-400 font-mono">
@@ -102,14 +102,14 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
       <div>
         {/* Top Header Badge & Icon */}
         <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-all duration-200 group-hover:bg-rose-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-rose-950/20">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-all duration-200 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-blue-950/20">
             <IconComponent className="h-6 w-6" />
           </div>
           
           <div className="flex items-center gap-1.5">
             {tool.tier === 1 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-rose-700 border border-rose-200/60 uppercase">
-                <Sparkles className="h-2.5 w-2.5 text-rose-600" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-blue-700 border border-blue-200/60 uppercase">
+                <Sparkles className="h-2.5 w-2.5 text-blue-600" />
                 POPULAR
               </span>
             )}
@@ -120,7 +120,7 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
         </div>
 
         {/* Title & Short Description */}
-        <h3 className="text-base sm:text-lg font-bold text-zinc-900 group-hover:text-rose-600 transition-colors">
+        <h3 className="text-base sm:text-lg font-bold text-zinc-900 group-hover:text-blue-600 transition-colors">
           {tool.name}
         </h3>
         <p className="mt-2 text-xs sm:text-sm text-zinc-600 leading-relaxed line-clamp-2">
@@ -131,8 +131,8 @@ export default function ToolCard({ tool, variant = 'grid' }: ToolCardProps) {
       {/* Bottom Action Footer */}
       <div className="mt-6 border-t border-zinc-100 pt-3 flex items-center justify-between text-xs font-semibold text-zinc-500 group-hover:text-zinc-900">
         <span className="font-mono text-[11px] text-zinc-400">100% Client-Side</span>
-        <span className="inline-flex items-center gap-1 font-bold text-rose-600 group-hover:text-rose-700">
-          Open Studio
+        <span className="inline-flex items-center gap-1 font-bold text-blue-600 group-hover:text-blue-700">
+          Open Tool
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
         </span>
       </div>
