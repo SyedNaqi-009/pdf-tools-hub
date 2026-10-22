@@ -8,14 +8,13 @@ import {
   Lock,
   Cpu,
   Layers,
-  FileText,
   Shield,
   ArrowUpRight,
-  Languages,
 } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import SectionHeading from '@/components/ui/SectionHeading';
 import ToolCard from '@/components/tools/ToolCard';
+import ToolLogo from '@/components/tools/ToolLogo';
 import FAQAccordion from '@/components/ui/FAQAccordion';
 import { getTier1Tools, TOOLS, TOOL_CATEGORIES } from '@/lib/tools-data';
 import { getHomeStructuredData, SITE_URL } from '@/lib/seo';
@@ -260,8 +259,8 @@ export default function HomePage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white group-hover:bg-blue-600 transition-colors">
-                      <FileText className="h-6 w-6" />
+                    <div className="transition-transform group-hover:scale-105">
+                      <ToolLogo slug="pdf-to-word" size={56} />
                     </div>
                     <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                       ★ TOP CONVERSION ENGINE
@@ -301,8 +300,8 @@ export default function HomePage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white group-hover:bg-blue-600 transition-colors">
-                      <Languages className="h-6 w-6" />
+                    <div className="transition-transform group-hover:scale-105">
+                      <ToolLogo slug="translate-pdf" size={56} />
                     </div>
                     <span className="font-mono text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                       50+ LANGUAGES

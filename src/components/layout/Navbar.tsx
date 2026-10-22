@@ -71,22 +71,22 @@ export default function Navbar() {
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2.5 group"
-              aria-label="dopdf Home"
+              className="flex items-center gap-3 group"
+              aria-label="DoPDF Home"
             >
-              <div className="relative flex h-11 w-11 items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center group-hover:scale-105 transition-transform duration-200">
                 <img
-                  src="/icon.png"
+                  src="/navbar-logo.png"
                   alt="DoPDF Logo"
-                  className="h-full w-full object-contain drop-shadow-md"
+                  className="h-full w-full object-contain drop-shadow-lg"
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-white leading-tight">
+                <span className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-none">
                   Do<span className="text-blue-500">PDF</span>
                 </span>
-                <span className="text-[10px] font-mono text-zinc-400 tracking-wider flex items-center gap-1">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] sm:text-[11px] font-mono text-zinc-300 font-bold tracking-wider flex items-center gap-1.5 mt-1">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                   FREE PDF CONVERTER
                 </span>
               </div>
@@ -261,16 +261,16 @@ export default function Navbar() {
           <Link
             href="/"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 text-base font-bold text-white"
+            className="flex items-center gap-3 text-base font-bold text-white"
           >
-            <div className="relative flex h-9 w-9 items-center justify-center">
+            <div className="relative flex h-11 w-11 items-center justify-center">
               <img
-                src="/icon.png"
+                src="/navbar-logo.png"
                 alt="DoPDF Logo"
-                className="h-full w-full object-contain drop-shadow-sm"
+                className="h-full w-full object-contain drop-shadow-md"
               />
             </div>
-            <span className="text-lg font-black tracking-tight text-white">
+            <span className="text-2xl font-black tracking-tight text-white">
               Do<span className="text-blue-500">PDF</span>
             </span>
           </Link>

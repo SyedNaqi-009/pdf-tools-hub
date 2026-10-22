@@ -63,15 +63,15 @@ export default function Footer() {
           
           {/* Column 1: Brand & Studio Mission */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="relative flex h-10 w-10 items-center justify-center">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative flex h-12 w-12 items-center justify-center">
                 <img
-                  src="/icon.png"
+                  src="/navbar-logo.png"
                   alt="DoPDF Logo"
                   className="h-full w-full object-contain drop-shadow-md"
                 />
               </div>
-              <span className="text-xl font-black tracking-tight text-white">
+              <span className="text-2xl font-black tracking-tight text-white">
                 Do<span className="text-blue-500">PDF</span>
               </span>
             </Link>
