@@ -15,6 +15,7 @@ import Container from '@/components/ui/Container';
 import SectionHeading from '@/components/ui/SectionHeading';
 import ToolCard from '@/components/tools/ToolCard';
 import ToolLogo from '@/components/tools/ToolLogo';
+import CategoryFilteredTools from '@/components/tools/CategoryFilteredTools';
 import FAQAccordion from '@/components/ui/FAQAccordion';
 import { getTier1Tools, TOOLS, TOOL_CATEGORIES } from '@/lib/tools-data';
 import { getHomeStructuredData, SITE_URL } from '@/lib/seo';
@@ -351,63 +352,19 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            SECTION 3: COMPLETE DIRECTORY BY CATEGORY
+            SECTION 3: COMPLETE DIRECTORY BY CATEGORY (IMAGE 1 STYLE)
         ========================================================================= */}
         <section className="py-14 sm:py-20 bg-white border-b border-zinc-200">
           <Container>
             <SectionHeading
-              badge="COMPLETE CATALOG"
-              title="All 27 PDF Utilities by Category"
-              subtitle="Every tool runs with 100% client-side memory safety, zero subscriptions, and complete confidentiality."
+              badge="DOCUMENT SUITE"
+              title="Browse PDF Tools by Category"
+              subtitle="Filter easily by conversion, organization, security, or optimization. All tools execute 100% locally in your browser."
               centered
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-10">
-              {TOOL_CATEGORIES.map((category, index) => {
-                const catTools = TOOLS.filter((t) => t.category === category.id);
-                return (
-                  <div
-                    key={category.id}
-                    className="rounded-3xl border border-zinc-200 bg-zinc-50/60 p-6 sm:p-7 space-y-5 flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between border-b border-zinc-200 pb-3.5">
-                        <div>
-                          <span className="font-mono text-xs font-bold text-blue-600 uppercase">
-                            SECTION 0{index + 1}
-                          </span>
-                          <h3 className="text-xl font-black text-zinc-950 mt-0.5">
-                            {category.label}
-                          </h3>
-                        </div>
-                        <span className="font-mono text-xs text-zinc-500 bg-white px-2.5 py-1 rounded-lg border border-zinc-200">
-                          {catTools.length} Tools
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-zinc-500 mt-2.5 leading-relaxed">
-                        {category.description}
-                      </p>
-
-                      <div className="mt-4 space-y-2">
-                        {catTools.map((tool) => (
-                          <ToolCard key={tool.slug} tool={tool} variant="compact" />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-3.5 border-t border-zinc-200/80">
-                      <Link
-                        href={`/tools#${category.id}`}
-                        className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-zinc-700 hover:text-blue-600 uppercase"
-                      >
-                        <span>Explore All {category.label}</span>
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="mt-10">
+              <CategoryFilteredTools initialCategory="convert" />
             </div>
           </Container>
         </section>

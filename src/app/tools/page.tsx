@@ -2,6 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 import Container from '@/components/ui/Container';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import CategoryFilteredTools from '@/components/tools/CategoryFilteredTools';
 import ToolCard from '@/components/tools/ToolCard';
 import { TOOLS, TOOL_CATEGORIES } from '@/lib/tools-data';
 import { generatePageMetadata } from '@/lib/seo';
@@ -51,8 +52,21 @@ export default function AllToolsPage() {
         </Container>
       </div>
 
-      {/* Categorized Tool Sections */}
-      <Container className="py-14 sm:py-20 space-y-20">
+      {/* Interactive Category Filtered Tools (Image 1 Style) */}
+      <Container className="py-10 sm:py-14">
+        <CategoryFilteredTools initialCategory="convert" />
+      </Container>
+
+      {/* Categorized Tool Sections Anchor Directory */}
+      <Container className="pb-16 sm:pb-24 space-y-16">
+        <div className="border-t border-zinc-200 pt-10">
+          <h2 className="text-xl sm:text-2xl font-black text-zinc-950 mb-2">
+            Complete Index by Module
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 mb-8">
+            Detailed breakdown of all 27 browser-side utilities grouped by functional domain.
+          </p>
+        </div>
         {TOOL_CATEGORIES.map((cat, index) => {
           const categoryTools = TOOLS.filter((t) => t.category === cat.id);
           return (

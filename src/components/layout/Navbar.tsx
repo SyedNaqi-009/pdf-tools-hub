@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { TOOLS, TOOL_CATEGORIES } from '@/lib/tools-data';
+import ToolLogo from '@/components/tools/ToolLogo';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -193,15 +194,20 @@ export default function Navbar() {
                             </span>
                           </div>
                           <ul className="space-y-1">
-                            {categoryTools.slice(0, 8).map((tool) => (
+                            {categoryTools.map((tool) => (
                               <li key={tool.slug}>
                                 <Link
                                   href={`/tools/${tool.slug}`}
-                                  className="group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                                  className="group flex items-center justify-between rounded-lg px-2 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                                 >
-                                  <span className="truncate">{tool.name}</span>
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="shrink-0 group-hover:scale-105 transition-transform">
+                                      <ToolLogo slug={tool.slug} size={22} />
+                                    </span>
+                                    <span className="truncate">{tool.name}</span>
+                                  </div>
                                   {tool.tier === 1 && (
-                                    <span className="ml-1 text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-rose-950 text-rose-400 border border-rose-900 uppercase">
+                                    <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-blue-950 text-blue-400 border border-blue-900 uppercase shrink-0">
                                       HOT
                                     </span>
                                   )}
@@ -329,49 +335,44 @@ export default function Navbar() {
             <span>Home</span>
           </Link>
 
-          {/* Categorized Tools Accordion in Mobile */}
-          <div className="space-y-2">
-            <div className="px-3 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500">
-              PDF Tools (27)
-            </div>
+          {/* Categorized Tools in Mobile (iLovePDF Style - Images 2 & 3) */}
+          <div className="space-y-6 pt-1">
             {TOOL_CATEGORIES.map((cat) => {
-              const isOpen = isMobileCategoryOpen[cat.id];
               const categoryTools = TOOLS.filter((t) => t.category === cat.id);
               return (
-                <div key={cat.id} className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => toggleMobileCategory(cat.id)}
-                    className="flex w-full items-center justify-between bg-zinc-900 px-3.5 py-2.5 text-xs font-semibold text-zinc-200"
-                  >
+                <div key={cat.id} className="space-y-2">
+                  <div className="px-2 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-800/80 pb-1.5 flex items-center justify-between">
                     <span>{cat.label}</span>
-                    <ChevronRight
-                      className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
-                        isOpen ? 'rotate-90 text-rose-400' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div className="bg-zinc-950 p-2 space-y-1 border-t border-zinc-800/60">
-                      {categoryTools.map((tool) => (
-                        <Link
-                          key={tool.slug}
-                          href={`/tools/${tool.slug}`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block rounded-lg px-3 py-2 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                        >
-                          {tool.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                    <span className="text-[10px] text-zinc-500 font-normal">{categoryTools.length}</span>
+                  </div>
+                  <div className="space-y-1">
+                    {categoryTools.map((tool) => (
+                      <Link
+                        key={tool.slug}
+                        href={`/tools/${tool.slug}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="group flex items-center gap-3 rounded-xl px-2.5 py-2 text-xs font-bold text-zinc-200 hover:bg-zinc-900 hover:text-white transition-colors"
+                      >
+                        <span className="shrink-0 group-hover:scale-105 transition-transform drop-shadow-xs">
+                          <ToolLogo slug={tool.slug} size={28} />
+                        </span>
+                        <span className="truncate">{tool.name}</span>
+                        {tool.tier === 1 && (
+                          <span className="ml-auto text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-900 uppercase">
+                            HOT
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               );
             })}
+
             <Link
               href="/tools"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between px-3 py-2 text-xs font-bold text-rose-400 hover:underline"
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-blue-950/60 border border-blue-900/60 text-xs font-bold text-blue-400 hover:bg-blue-900/60 transition-colors"
             >
               <span>View All 27 Tools Directory →</span>
             </Link>
