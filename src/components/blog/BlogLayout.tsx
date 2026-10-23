@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, Clock, User, ArrowLeft, ArrowRight, ShieldCheck, FileText } from 'lucide-react';
+import { Calendar, User, ArrowLeft, ArrowRight, ShieldCheck, FileText } from 'lucide-react';
 import Container from '../ui/Container';
 import Breadcrumbs from '../layout/Breadcrumbs';
 import { BlogPostMeta } from '@/lib/blog';
@@ -57,11 +57,6 @@ export default function BlogLayout({ post, children }: BlogLayoutProps) {
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
                 <time dateTime={post.date}>{post.date}</time>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                {post.readingTime}
               </span>
             </div>
           </div>

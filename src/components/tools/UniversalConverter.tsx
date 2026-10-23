@@ -47,6 +47,7 @@ export default function UniversalConverter({
   const [resultSize, setResultSize] = useState<number>(0);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cancelControllerRef = useRef<AbortController | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   // Auto-detect file type when a file is selected
@@ -117,7 +118,20 @@ export default function UniversalConverter({
     }
   };
 
+  const handleCancel = () => {
+    if (cancelControllerRef.current) {
+      cancelControllerRef.current.abort();
+    }
+    setIsProcessing(false);
+    setProgress(0);
+    setStatusText('Conversion cancelled by user.');
+    setError('Operation cancelled by user.');
+  };
+
   const updateProgress = (p: number, msg: string) => {
+    if (cancelControllerRef.current?.signal.aborted) {
+      throw new Error('Operation cancelled by user.');
+    }
     setProgress(p);
     setStatusText(msg);
   };
@@ -128,6 +142,7 @@ export default function UniversalConverter({
       return;
     }
 
+    cancelControllerRef.current = new AbortController();
     setIsProcessing(true);
     setProgress(5);
     setStatusText('Preparing client-side conversion engine...');
@@ -448,7 +463,7 @@ export default function UniversalConverter({
                   >
                     {availableOps.map((op) => (
                       <option key={op.id} value={op.id}>
-                        {op.label} — {op.description}
+                        {op.label} ({op.outputFormat})
                       </option>
                     ))}
                   </select>
@@ -456,6 +471,14 @@ export default function UniversalConverter({
                     ▼
                   </div>
                 </div>
+                {selectedOp && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500">
+                    <span className="shrink-0 rounded bg-blue-50 px-2 py-0.5 font-mono font-bold text-blue-700 text-[11px]">
+                      .{selectedOp.outputExtension.toUpperCase()}
+                    </span>
+                    <span>{selectedOp.description}</span>
+                  </div>
+                )}
               </div>
 
               {/* STEP 4: Quality Selection (Phase 3) */}
@@ -515,12 +538,21 @@ export default function UniversalConverter({
                   </button>
                 ) : (
                   <div className="rounded-2xl border border-blue-200 bg-blue-50/80 p-5 space-y-3">
-                    <div className="flex items-center justify-between text-xs font-bold text-blue-900">
-                      <span className="flex items-center gap-2">
-                        <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-                        <span>{statusText || 'Processing document in local RAM...'}</span>
+                    <div className="flex items-center justify-between text-xs font-bold text-blue-900 gap-3">
+                      <span className="flex items-center gap-2 truncate">
+                        <RefreshCw className="h-4 w-4 animate-spin text-blue-600 shrink-0" />
+                        <span className="truncate">{statusText || 'Processing document in local RAM...'}</span>
                       </span>
-                      <span className="font-mono">{progress}%</span>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-mono">{progress}%</span>
+                        <button
+                          type="button"
+                          onClick={handleCancel}
+                          className="rounded-lg border border-red-200 bg-white px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors shadow-2xs"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-blue-200">
                       <div

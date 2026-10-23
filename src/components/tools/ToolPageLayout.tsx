@@ -71,8 +71,13 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
   const [detectedFields, setDetectedFields] = useState<string[]>([]);
   const [formFieldValues, setFormFieldValues] = useState<Record<string, string>>({});
 
+  const cancelControllerRef = useRef<AbortController | null>(null);
+
   // Reset tool state
   const handleReset = () => {
+    if (cancelControllerRef.current) {
+      cancelControllerRef.current.abort();
+    }
     setFiles([]);
     setIsProcessing(false);
     setProgress(0);
@@ -86,7 +91,20 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
     setHasSignature(false);
   };
 
+  const handleCancel = () => {
+    if (cancelControllerRef.current) {
+      cancelControllerRef.current.abort();
+    }
+    setIsProcessing(false);
+    setProgress(0);
+    setStatusText('Cancelled by user.');
+    setError('Operation cancelled by user.');
+  };
+
   const updateProgress = (p: number, msg: string) => {
+    if (cancelControllerRef.current?.signal.aborted) {
+      throw new Error('Operation cancelled by user.');
+    }
     setProgress(p);
     setStatusText(msg);
   };
@@ -203,6 +221,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
       return;
     }
 
+    cancelControllerRef.current = new AbortController();
     setIsProcessing(true);
     setProgress(5);
     setStatusText('Starting client-side operation...');
@@ -884,6 +903,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                 progress={progress}
                 statusText={statusText}
                 error={error}
+                onCancel={handleCancel}
               />
 
               {/* Download CTA Button */}

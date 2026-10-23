@@ -189,7 +189,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
       return [
         {
           id: 'pdf-to-word',
-          label: 'PDF to Word (.docx)',
+          label: 'PDF to Word',
           description: 'Convert PDF into an editable Microsoft Word document with preserved layout & tables.',
           outputFormat: 'DOCX',
           outputExtension: 'docx',
@@ -200,7 +200,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
         },
         {
           id: 'pdf-to-excel',
-          label: 'PDF to Excel (.xlsx)',
+          label: 'PDF to Excel',
           description: 'Extract tables and data rows into structured Microsoft Excel spreadsheets.',
           outputFormat: 'XLSX',
           outputExtension: 'xlsx',
@@ -211,7 +211,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
         },
         {
           id: 'pdf-to-powerpoint',
-          label: 'PDF to PowerPoint (.pptx)',
+          label: 'PDF to PowerPoint',
           description: 'Convert PDF pages into editable Microsoft PowerPoint presentation slides.',
           outputFormat: 'PPTX',
           outputExtension: 'pptx',
@@ -222,7 +222,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
         },
         {
           id: 'pdf-to-jpg',
-          label: 'PDF to JPG Images',
+          label: 'PDF to JPG',
           description: 'Render and extract high-resolution JPEG images of each PDF page.',
           outputFormat: 'JPG',
           outputExtension: 'jpg',
@@ -233,8 +233,8 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
         },
         {
           id: 'pdf-to-png',
-          label: 'PDF to PNG Images',
-          description: 'Render PDF pages into crystal-clear lossless PNG images with transparent backgrounds.',
+          label: 'PDF to PNG',
+          description: 'Render PDF pages into crystal-clear lossless PNG images.',
           outputFormat: 'PNG',
           outputExtension: 'png',
           outputMimeType: 'image/png',
@@ -266,7 +266,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
         },
         {
           id: 'split-pdf',
-          label: 'Split PDF Pages',
+          label: 'Split PDF',
           description: 'Separate pages or specific ranges into individual PDF documents.',
           outputFormat: 'PDF',
           outputExtension: 'pdf',
@@ -288,7 +288,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
         },
         {
           id: 'protect-pdf',
-          label: 'Password Protect PDF',
+          label: 'Protect PDF',
           description: 'Encrypt PDF with AES password protection to prevent unauthorized viewing.',
           outputFormat: 'PDF',
           outputExtension: 'pdf',
@@ -303,7 +303,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
       return [
         {
           id: 'word-to-pdf',
-          label: 'Word to PDF (.pdf)',
+          label: 'Word to PDF',
           description: 'Convert Microsoft Word (.docx/.doc) into a professional, layout-preserved PDF.',
           outputFormat: 'PDF',
           outputExtension: 'pdf',
@@ -318,7 +318,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
       return [
         {
           id: 'excel-to-pdf',
-          label: 'Excel to PDF (.pdf)',
+          label: 'Excel to PDF',
           description: 'Convert Excel spreadsheets into a print-ready formatted PDF document.',
           outputFormat: 'PDF',
           outputExtension: 'pdf',
@@ -333,7 +333,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
       return [
         {
           id: 'powerpoint-to-pdf',
-          label: 'PowerPoint to PDF (.pdf)',
+          label: 'PowerPoint to PDF',
           description: 'Convert presentation slides into high-resolution PDF pages.',
           outputFormat: 'PDF',
           outputExtension: 'pdf',
@@ -348,7 +348,7 @@ export function getAvailableOperations(fileType: DetectedFileType): ConversionOp
       return [
         {
           id: 'image-to-pdf',
-          label: 'Image to PDF (.pdf)',
+          label: 'Image to PDF',
           description: 'Convert photo files into a standardized, high-quality PDF document.',
           outputFormat: 'PDF',
           outputExtension: 'pdf',

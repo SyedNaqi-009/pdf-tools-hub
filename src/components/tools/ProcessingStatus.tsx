@@ -6,6 +6,7 @@ interface ProcessingStatusProps {
   progress?: number;
   statusText?: string;
   error?: string | null;
+  onCancel?: () => void;
 }
 
 export default function ProcessingStatus({
@@ -13,6 +14,7 @@ export default function ProcessingStatus({
   progress = 0,
   statusText = 'Processing your document...',
   error = null,
+  onCancel,
 }: ProcessingStatusProps) {
   if (error) {
     return (
@@ -31,15 +33,26 @@ export default function ProcessingStatus({
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-100 shadow-xl space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5 text-rose-400">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="font-bold text-sm sm:text-base text-white">
+        <div className="flex items-center gap-2.5 text-rose-400 min-w-0 pr-3">
+          <Loader2 className="h-5 w-5 animate-spin shrink-0" />
+          <span className="font-bold text-sm sm:text-base text-white truncate">
             {statusText}
           </span>
         </div>
-        <span className="font-mono text-xs font-bold text-zinc-400">
-          {Math.round(progress)}%
-        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="font-mono text-xs font-bold text-zinc-400">
+            {Math.round(progress)}%
+          </span>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-xs font-semibold text-rose-400 hover:bg-zinc-800 hover:text-rose-300 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Progress Track */}
