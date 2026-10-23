@@ -316,48 +316,21 @@ export async function pdfToWord(
   const pdfDoc = await loadingTask.promise;
   const numPages = pdfDoc.numPages;
 
-  const docChildren: (Paragraph | Table)[] = [];
+  const docSections: Array<{
+    properties: { page: { margin: { top: number; right: number; bottom: number; left: number } } };
+    children: (Paragraph | Table)[];
+  }> = [];
 
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    const percent = Math.round(12 + (pageNum / numPages) * 70);
-    onProgress?.(percent, `Extracting layout, colors, tables, and typography (page ${pageNum}/${numPages})...`);
-
-    if (pageNum > 1 && docChildren.length > 0) {
-      docChildren.push(
-        new Paragraph({
-          children: [new PageBreak()],
-        })
-      );
-    }
+    const percent = Math.round(10 + (pageNum / numPages) * 75);
+    onProgress?.(
+      percent,
+      `Extracting layout, colors, tables, and typography (page ${pageNum}/${numPages})...`
+    );
 
     const { textItems, rects, images, pageWidth } = await extractPageContent(pdfDoc, pageNum);
 
     if (textItems.length === 0 && images.length === 0) continue;
-
-    // 1. Embed Images / Logos at top if present
-    for (const img of images) {
-      try {
-        const maxW = 500;
-        const scale = img.width > maxW ? maxW / img.width : 1;
-        docChildren.push(
-          new Paragraph({
-            children: [
-              new ImageRun({
-                data: img.data,
-                transformation: {
-                  width: Math.round(img.width * scale),
-                  height: Math.round(img.height * scale),
-                },
-                type: 'png',
-              }),
-            ],
-            spacing: { after: 120 },
-          })
-        );
-      } catch {
-        // Skip invalid image
-      }
-    }
 
     const handledTextIndices = new Set<number>();
     interface DocBlock {
@@ -439,12 +412,12 @@ export async function pdfToWord(
                 new TextRun({
                   text: item.str,
                   bold: true,
-                  size: Math.max(48, item.fontSize * 2),
+                  size: Math.max(52, Math.round(item.fontSize * 2)),
                   color: box.color,
                   font: 'Arial',
                 }),
               ],
-              spacing: { before: 100, after: 100 },
+              spacing: { before: 140, after: 140 },
             })
         );
 
@@ -455,8 +428,11 @@ export async function pdfToWord(
               children: [
                 new TextRun({
                   text: item.str,
-                  bold: true,
-                  size: idx === 0 ? Math.max(40, item.fontSize * 2) : Math.max(30, item.fontSize * 2),
+                  bold: idx === 0,
+                  size:
+                    idx === 0
+                      ? Math.max(48, Math.round(item.fontSize * 2))
+                      : Math.max(34, Math.round(item.fontSize * 2)),
                   color: 'FFFFFF', // Crisp white on dark background box
                   font: 'Georgia',
                 }),
@@ -485,7 +461,7 @@ export async function pdfToWord(
                 new TableCell({
                   width: { size: 50, type: WidthType.PERCENTAGE },
                   shading: { type: ShadingType.CLEAR, fill: box.color, color: 'auto' },
-                  margins: { top: 160, bottom: 160, left: 200, right: 200 },
+                  margins: { top: 200, bottom: 200, left: 240, right: 240 },
                   children: rightParagraphs,
                 }),
               ],
@@ -494,7 +470,10 @@ export async function pdfToWord(
         });
 
         docBlocks.push({ y: box.y + box.height, element: headerTable });
-        docBlocks.push({ y: box.y + box.height - 1, element: new Paragraph({ text: '', spacing: { after: 140 } }) });
+        docBlocks.push({
+          y: box.y + box.height - 1,
+          element: new Paragraph({ text: '', spacing: { after: 160 } }),
+        });
       }
     }
 
@@ -567,10 +546,10 @@ export async function pdfToWord(
 
         const sortedBodyYs = Array.from(bodyLineMap.keys()).sort((a, b) => b - a);
 
-        // Calculate proportional column widths
+        // Proportional column widths matching original PDF
         const colWidthPercents: number[] = [];
         if (numCols === 3) {
-          colWidthPercents.push(46, 27, 27);
+          colWidthPercents.push(48, 26, 26);
         } else {
           const defaultWidth = Math.round(100 / numCols);
           for (let c = 0; c < numCols; c++) colWidthPercents.push(defaultWidth);
@@ -585,7 +564,7 @@ export async function pdfToWord(
             new TableCell({
               width: { size: colWidthPercents[cIdx] || 33, type: WidthType.PERCENTAGE },
               shading: { type: ShadingType.CLEAR, fill: tableHeaderRect.color, color: 'auto' },
-              margins: { top: 140, bottom: 140, left: 160, right: 160 },
+              margins: { top: 160, bottom: 160, left: 180, right: 180 },
               children: [
                 new Paragraph({
                   alignment:
@@ -637,10 +616,10 @@ export async function pdfToWord(
                   ? { type: ShadingType.CLEAR, fill: tableBodyRect.color, color: 'auto' }
                   : undefined,
                 margins: {
-                  top: isNetSalary ? 160 : 100,
-                  bottom: isNetSalary ? 160 : 100,
-                  left: 160,
-                  right: 160,
+                  top: isNetSalary ? 220 : 110,
+                  bottom: isNetSalary ? 200 : 110,
+                  left: 180,
+                  right: 180,
                 },
                 children: [
                   new Paragraph({
@@ -653,7 +632,9 @@ export async function pdfToWord(
                             : cellItem.str
                           : '',
                         bold: isNetSalary || (cellItem ? cellItem.isBold : false),
-                        size: isNetSalary ? 24 : 20,
+                        size: isNetSalary
+                          ? 26
+                          : Math.max(22, Math.round((cellItem ? cellItem.fontSize : 12) * 2)),
                         color: tableHeaderRect.color, // Navy color
                         font: 'Arial',
                       }),
@@ -682,7 +663,7 @@ export async function pdfToWord(
         docBlocks.push({ y: tableHeaderRect.y + tableHeaderRect.height, element: contentTable });
         docBlocks.push({
           y: tableHeaderRect.y + tableHeaderRect.height - 1,
-          element: new Paragraph({ text: '', spacing: { after: 120 } }),
+          element: new Paragraph({ text: '', spacing: { after: 140 } }),
         });
       }
     }
@@ -708,7 +689,7 @@ export async function pdfToWord(
               new TableCell({
                 width: { size: 100, type: WidthType.PERCENTAGE },
                 shading: { type: ShadingType.CLEAR, fill: bottomRect.color, color: 'auto' },
-                margins: { top: 220, bottom: 220, left: 100, right: 100 },
+                margins: { top: 240, bottom: 240, left: 100, right: 100 },
                 children: [new Paragraph({ text: '' })],
               }),
             ],
@@ -738,6 +719,7 @@ export async function pdfToWord(
     }
 
     const sortedYs = Array.from(lineMap.keys()).sort((a, b) => b - a);
+    let isFirstMeta = true;
 
     for (const y of sortedYs) {
       const lineItems = lineMap.get(y)!.sort((a, b) => a.x - b.x);
@@ -748,6 +730,8 @@ export async function pdfToWord(
 
       const runs: TextRun[] = [];
       const colonIdx = fullLineStr.indexOf(':');
+      const isSubtitle = fullLineStr.toLowerCase().includes('salary slip for');
+
       if (colonIdx !== -1 && colonIdx < 30) {
         const label = fullLineStr.substring(0, colonIdx + 1);
         const val = fullLineStr.substring(colonIdx + 1);
@@ -755,7 +739,7 @@ export async function pdfToWord(
           new TextRun({
             text: label,
             bold: true,
-            size: 24,
+            size: 30, // 15pt matching source PDF
             color: '050066',
             font: 'Arial',
           })
@@ -764,25 +748,23 @@ export async function pdfToWord(
           new TextRun({
             text: val,
             bold: false,
-            size: 24,
+            size: 30, // 15pt matching source PDF
             color: '050066',
             font: 'Arial',
           })
         );
       } else {
-        const isSubtitle = fullLineStr.toLowerCase().includes('salary slip for');
         runs.push(
           new TextRun({
             text: fullLineStr,
             bold: false,
-            size: isSubtitle ? 22 : 24,
+            size: isSubtitle ? 24 : 28,
             color: '050066',
             font: 'Arial',
           })
         );
       }
 
-      const isSubtitle = fullLineStr.toLowerCase().includes('salary slip for');
       const maxFontInLine = Math.max(...lineItems.map((i) => i.fontSize));
       let heading: (typeof HeadingLevel)[keyof typeof HeadingLevel] | undefined;
       if (maxFontInLine >= 22) {
@@ -795,35 +777,49 @@ export async function pdfToWord(
         children: runs,
         heading,
         spacing: {
-          before: isSubtitle ? 180 : heading ? 120 : 40,
-          after: isSubtitle ? 140 : heading ? 100 : 70,
-          line: 260,
+          before: isSubtitle ? 200 : isFirstMeta ? 180 : 40,
+          after: isSubtitle ? 140 : heading ? 100 : 80,
+          line: 300,
         },
       });
 
+      if (!isSubtitle && colonIdx !== -1) isFirstMeta = false;
       docBlocks.push({ y, element: p });
     }
 
     // Sort ALL page blocks in true visual descending order (top to bottom)
     docBlocks.sort((a, b) => b.y - a.y);
-    docChildren.push(...docBlocks.map((b) => b.element));
+
+    docSections.push({
+      properties: {
+        page: {
+          margin: { top: 720, right: 540, bottom: 200, left: 540 },
+        },
+      },
+      children:
+        docBlocks.length > 0
+          ? docBlocks.map((b) => b.element)
+          : [new Paragraph({ children: [new TextRun('')] })],
+    });
   }
 
   onProgress?.(88, 'Packaging into Microsoft Word OpenXML (.docx) container...');
   const doc = new Document({
-    sections: [
-      {
-        properties: {
-          page: {
-            margin: { top: 720, right: 720, bottom: 720, left: 720 },
-          },
-        },
-        children:
-          docChildren.length > 0
-            ? docChildren
-            : [new Paragraph({ children: [new TextRun('No readable document structure detected.')] })],
-      },
-    ],
+    sections:
+      docSections.length > 0
+        ? docSections
+        : [
+            {
+              properties: {
+                page: {
+                  margin: { top: 720, right: 540, bottom: 200, left: 540 },
+                },
+              },
+              children: [
+                new Paragraph({ children: [new TextRun('No readable document structure detected.')] }),
+              ],
+            },
+          ],
   });
 
   const docxBlob = await Packer.toBlob(doc);

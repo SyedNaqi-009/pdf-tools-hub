@@ -261,6 +261,10 @@ export async function translatePdf(
         width: 595.28,
         height: 841.89,
       });
+
+      // Free GPU and raster canvas memory immediately for large 10-50+ page documents
+      canvas.width = 0;
+      canvas.height = 0;
     }
   } else {
     // Headless / fallback with safe WinAnsi sanitization so it NEVER crashes
