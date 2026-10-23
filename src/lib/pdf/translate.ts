@@ -191,7 +191,7 @@ export async function translatePdf(
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
       // Header top bar
-      ctx.fillStyle = '#2563eb'; // blue accent
+      ctx.fillStyle = '#000866'; // Deep Navy (#000866) matching platform fidelity
       ctx.font = `bold ${Math.round(11 * scale)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Nastaliq Urdu", sans-serif`;
       ctx.textAlign = 'left';
       ctx.direction = 'ltr';

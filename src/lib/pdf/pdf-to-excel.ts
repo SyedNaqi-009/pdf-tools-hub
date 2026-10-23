@@ -104,14 +104,18 @@ export async function pdfToExcel(
           }
         }
 
-        // Try parsing numbers (decimals, currencies, percentages, negatives)
+        // Try parsing numbers (decimals, currencies, percentages, negatives, and "/-" notation)
         let parsedVal: string | number = item.str;
-        const cleanNumberStr = item.str.replace(/[$,€£%]/g, '').trim();
+        const cleanNumberStr = item.str
+          .replace(/[$,€£%]/g, '')
+          .replace(/\/-$/, '')
+          .replace(/,/g, '')
+          .trim();
 
         if (
           cleanNumberStr !== '' &&
           !isNaN(Number(cleanNumberStr)) &&
-          !item.str.startsWith('0') // preserve leading zeros for codes/IDs
+          (!item.str.startsWith('0') || item.str === '0') // preserve leading zeros for codes/IDs unless just '0'
         ) {
           parsedVal = Number(cleanNumberStr);
         }
