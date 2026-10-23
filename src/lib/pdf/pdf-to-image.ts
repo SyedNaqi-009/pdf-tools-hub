@@ -67,6 +67,10 @@ export async function pdfToImage(
     });
 
     results.push(blob);
+
+    // Free GPU/canvas memory immediately to support large 10-50+ page PDFs safely
+    canvas.width = 0;
+    canvas.height = 0;
   }
 
   onProgress?.(100, `Successfully rendered ${numPages} page images.`);

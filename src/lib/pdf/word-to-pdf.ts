@@ -191,7 +191,10 @@ export async function wordToPdf(
         }
 
         // Case C: Standard Data / Earnings Table
-        const colWidth = contentWidth / numCols;
+        const colWidths =
+          numCols === 3
+            ? [contentWidth * 0.5, contentWidth * 0.26, contentWidth * 0.24]
+            : Array(numCols).fill(contentWidth / numCols);
         const rowHeight = 24;
 
         tableData.forEach((row, rIdx) => {
@@ -203,12 +206,12 @@ export async function wordToPdf(
             doc.setFillColor(0, 8, 102); // Deep Navy
             doc.rect(margin, cursorY - 15, contentWidth, rowHeight, 'F');
             doc.setFont('Helvetica', 'bold');
-            doc.setFontSize(10);
+            doc.setFontSize(10.5);
             doc.setTextColor(255, 255, 255); // Crisp White
           } else {
             // Card fill
             doc.setFillColor(246, 246, 246);
-            doc.rect(margin, cursorY - 15, contentWidth, rowHeight, 'F');
+            doc.rect(margin, cursorY - 15, contentWidth, isNetSalary ? rowHeight + 10 : rowHeight, 'F');
 
             if (isNetSalary) {
               doc.setFont('Helvetica', 'bold');
@@ -221,24 +224,28 @@ export async function wordToPdf(
             }
           }
 
+          let curCellX = margin;
           for (let c = 0; c < numCols; c++) {
+            const curWidth = colWidths[c];
             const cellText = row[c] || '';
-            const cellX = margin + c * colWidth;
 
             // Check if currency/number for right-alignment
             const isNumeric = /^[$\u20AC\u00A3]?\s*-?\d[\d,.]*\s*([%\/-]|Rs\.?)?$/.test(cellText);
-            const maxChars = Math.floor(colWidth / 5.5);
+            const maxChars = Math.floor(curWidth / 5.5);
             const display = cellText.length > maxChars ? cellText.slice(0, maxChars - 2) + '..' : cellText;
 
-            if (isNumeric || (isNetSalary && c === numCols - 1)) {
-              doc.text(display, cellX + colWidth - 8, cursorY, { align: 'right' });
-            } else if (c === 0) {
-              doc.text(display, cellX + 8, cursorY);
+            if (isNetSalary && c === numCols - 1) {
+              doc.text(display, curCellX + curWidth - 8, cursorY, { align: 'right' });
+            } else if (c === 0 || c === 1) {
+              doc.text(display, curCellX + 8, cursorY);
+            } else if (isNumeric) {
+              doc.text(display, curCellX + curWidth - 8, cursorY, { align: 'right' });
             } else {
-              doc.text(display, cellX + colWidth / 2, cursorY, { align: 'center' });
+              doc.text(display, curCellX + curWidth / 2, cursorY, { align: 'center' });
             }
+            curCellX += curWidth;
           }
-          cursorY += isNetSalary ? rowHeight + 6 : rowHeight;
+          cursorY += isNetSalary ? rowHeight + 12 : rowHeight;
         });
         cursorY += 14;
       }

@@ -13,6 +13,7 @@ import {
   AlignmentType,
   HeadingLevel,
   PageBreak,
+  VerticalAlign,
 } from 'docx';
 import { ProgressCallback } from './merge';
 import { ConversionQuality } from '../conversion-registry';
@@ -27,6 +28,7 @@ interface RichTextItem {
   y: number;
   fontSize: number;
   fontName: string;
+  fontFamily: string;
   isBold: boolean;
   isItalic: boolean;
   color: string; // hex "RRGGBB"
@@ -270,18 +272,44 @@ async function extractPageContent(
     const x = 'transform' in rawItem ? Math.round(rawItem.transform[4]) : 0;
     const y = 'transform' in rawItem ? Math.round(rawItem.transform[5]) : 0;
     const fontSize = 'transform' in rawItem ? Math.round(Math.abs(rawItem.transform[0])) : 11;
-    const fontName = (
-      'fontName' in rawItem && typeof rawItem.fontName === 'string' ? rawItem.fontName : ''
-    ).toLowerCase();
+    const rawFontId = 'fontName' in rawItem && typeof rawItem.fontName === 'string' ? rawItem.fontName : '';
 
+    // Extract true PostScript font name from commonObjs dictionary
+    let realFont = '';
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const commonObjs = (page as any).commonObjs;
+      if (commonObjs && rawFontId && commonObjs.has(rawFontId)) {
+        const fObj = commonObjs.get(rawFontId);
+        realFont = (fObj?.name || '').replace(/^[A-Z]{6}\+/, '');
+      }
+    } catch {
+      // Best effort
+    }
+
+    const fontLower = (realFont || rawFontId).toLowerCase();
     const isBold =
-      fontName.includes('bold') ||
-      fontName.includes('black') ||
-      fontName.includes('heavy') ||
-      fontName.includes('700') ||
-      fontName.includes('800') ||
-      fontName.includes('900');
-    const isItalic = fontName.includes('italic') || fontName.includes('oblique');
+      fontLower.includes('bold') ||
+      fontLower.includes('black') ||
+      fontLower.includes('heavy') ||
+      fontLower.includes('semibold') ||
+      fontLower.includes('700') ||
+      fontLower.includes('800') ||
+      fontLower.includes('900');
+    const isItalic = fontLower.includes('italic') || fontLower.includes('oblique');
+
+    // Resolve native font family
+    let fontFamily = 'Arial';
+    if (fontLower.includes('poppins')) fontFamily = 'Poppins';
+    else if (fontLower.includes('bebas')) fontFamily = 'Bebas Neue';
+    else if (fontLower.includes('bevan')) fontFamily = 'Bevan';
+    else if (fontLower.includes('georgia')) fontFamily = 'Georgia';
+    else if (fontLower.includes('times')) fontFamily = 'Times New Roman';
+    else if (fontLower.includes('calibri')) fontFamily = 'Calibri';
+    else if (fontLower.includes('roboto')) fontFamily = 'Roboto';
+    else if (fontLower.includes('courier')) fontFamily = 'Courier New';
+    else if (fontLower.includes('sans')) fontFamily = 'Arial';
+    else if (fontLower.includes('serif')) fontFamily = 'Georgia';
 
     let color = '050066'; // Default to deep navy if unspecified
     if (showTextIdx < colorAtTextIndex.length && colorAtTextIndex[showTextIdx] !== '000000') {
@@ -292,7 +320,17 @@ async function extractPageContent(
       showTextIdx++;
     }
 
-    textItems.push({ str: rawItem.str, x, y, fontSize, fontName, isBold, isItalic, color });
+    textItems.push({
+      str: rawItem.str,
+      x,
+      y,
+      fontSize,
+      fontName: realFont || rawFontId,
+      fontFamily,
+      isBold,
+      isItalic,
+      color,
+    });
   }
 
   return { textItems, rects, images, pageWidth, pageHeight };
@@ -414,7 +452,7 @@ export async function pdfToWord(
                   bold: true,
                   size: Math.max(52, Math.round(item.fontSize * 2)),
                   color: box.color,
-                  font: 'Arial',
+                  font: item.fontFamily || 'Poppins',
                 }),
               ],
               spacing: { before: 140, after: 140 },
@@ -434,7 +472,7 @@ export async function pdfToWord(
                       ? Math.max(48, Math.round(item.fontSize * 2))
                       : Math.max(34, Math.round(item.fontSize * 2)),
                   color: 'FFFFFF', // Crisp white on dark background box
-                  font: 'Georgia',
+                  font: item.fontFamily || 'Georgia',
                 }),
               ],
               spacing: { after: 30 },
@@ -455,12 +493,14 @@ export async function pdfToWord(
             new TableRow({
               children: [
                 new TableCell({
-                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  width: { size: 48, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
                   children: leftParagraphs.length > 0 ? leftParagraphs : [new Paragraph({ text: '' })],
                 }),
                 new TableCell({
-                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  width: { size: 52, type: WidthType.PERCENTAGE },
                   shading: { type: ShadingType.CLEAR, fill: box.color, color: 'auto' },
+                  verticalAlign: VerticalAlign.CENTER,
                   margins: { top: 200, bottom: 200, left: 240, right: 240 },
                   children: rightParagraphs,
                 }),
@@ -549,7 +589,7 @@ export async function pdfToWord(
         // Proportional column widths matching original PDF
         const colWidthPercents: number[] = [];
         if (numCols === 3) {
-          colWidthPercents.push(48, 26, 26);
+          colWidthPercents.push(50, 26, 24);
         } else {
           const defaultWidth = Math.round(100 / numCols);
           for (let c = 0; c < numCols; c++) colWidthPercents.push(defaultWidth);
@@ -564,7 +604,7 @@ export async function pdfToWord(
             new TableCell({
               width: { size: colWidthPercents[cIdx] || 33, type: WidthType.PERCENTAGE },
               shading: { type: ShadingType.CLEAR, fill: tableHeaderRect.color, color: 'auto' },
-              margins: { top: 160, bottom: 160, left: 180, right: 180 },
+              margins: { top: 160, bottom: 160, left: 200, right: 180 },
               children: [
                 new Paragraph({
                   alignment:
@@ -572,14 +612,14 @@ export async function pdfToWord(
                       ? AlignmentType.LEFT
                       : cIdx === numCols - 1
                         ? AlignmentType.RIGHT
-                        : AlignmentType.CENTER,
+                        : AlignmentType.LEFT,
                   children: [
                     new TextRun({
                       text: hItem.str.toUpperCase(),
                       bold: true,
-                      size: 22,
+                      size: 34, // 17pt Bebas Neue
                       color: 'FFFFFF', // White text on dark navy
-                      font: 'Arial',
+                      font: 'Bebas Neue',
                     }),
                   ],
                 }),
@@ -607,7 +647,7 @@ export async function pdfToWord(
                 ? AlignmentType.LEFT
                 : c === numCols - 1
                   ? AlignmentType.RIGHT
-                  : AlignmentType.CENTER;
+                  : AlignmentType.LEFT;
 
             cells.push(
               new TableCell({
@@ -616,9 +656,9 @@ export async function pdfToWord(
                   ? { type: ShadingType.CLEAR, fill: tableBodyRect.color, color: 'auto' }
                   : undefined,
                 margins: {
-                  top: isNetSalary ? 220 : 110,
-                  bottom: isNetSalary ? 200 : 110,
-                  left: 180,
+                  top: isNetSalary ? 280 : 100,
+                  bottom: isNetSalary ? 240 : 100,
+                  left: 200,
                   right: 180,
                 },
                 children: [
@@ -633,10 +673,14 @@ export async function pdfToWord(
                           : '',
                         bold: isNetSalary || (cellItem ? cellItem.isBold : false),
                         size: isNetSalary
-                          ? 26
+                          ? 34
                           : Math.max(22, Math.round((cellItem ? cellItem.fontSize : 12) * 2)),
                         color: tableHeaderRect.color, // Navy color
-                        font: 'Arial',
+                        font: isNetSalary
+                          ? 'Bebas Neue'
+                          : cellItem
+                            ? cellItem.fontFamily
+                            : 'Poppins',
                       }),
                     ],
                   }),
@@ -670,7 +714,7 @@ export async function pdfToWord(
 
     // 4. Identify Bottom Banner (Solid navy bar across bottom of page)
     const bottomRect = rects.find(
-      (r) => r.y <= 30 && r.height >= 15 && r.width >= pageWidth * 0.8 && colorContrast(r.color)
+      (r) => (r.y <= 120 || r.y >= 700) && r.height >= 15 && r.width >= pageWidth * 0.8 && colorContrast(r.color)
     );
     if (bottomRect) {
       const bottomBar = new Table({
@@ -732,25 +776,27 @@ export async function pdfToWord(
       const colonIdx = fullLineStr.indexOf(':');
       const isSubtitle = fullLineStr.toLowerCase().includes('salary slip for');
 
+      const lineFontFamily = lineItems[0]?.fontFamily || 'Arial';
+
       if (colonIdx !== -1 && colonIdx < 30) {
         const label = fullLineStr.substring(0, colonIdx + 1);
         const val = fullLineStr.substring(colonIdx + 1);
         runs.push(
           new TextRun({
-            text: label,
+            text: label.endsWith(':') ? label + ' ' : label,
             bold: true,
-            size: 30, // 15pt matching source PDF
+            size: 24, // 12pt matching iLovePDF compact rendering
             color: '050066',
-            font: 'Arial',
+            font: lineFontFamily || 'Poppins',
           })
         );
         runs.push(
           new TextRun({
-            text: val,
+            text: val.trim(),
             bold: false,
-            size: 30, // 15pt matching source PDF
+            size: 24, // 12pt matching iLovePDF compact rendering
             color: '050066',
-            font: 'Arial',
+            font: lineFontFamily || 'Poppins',
           })
         );
       } else {
@@ -758,9 +804,9 @@ export async function pdfToWord(
           new TextRun({
             text: fullLineStr,
             bold: false,
-            size: isSubtitle ? 24 : 28,
+            size: isSubtitle ? 22 : 26,
             color: '050066',
-            font: 'Arial',
+            font: lineFontFamily || 'Poppins',
           })
         );
       }
@@ -777,9 +823,9 @@ export async function pdfToWord(
         children: runs,
         heading,
         spacing: {
-          before: isSubtitle ? 200 : isFirstMeta ? 180 : 40,
-          after: isSubtitle ? 140 : heading ? 100 : 80,
-          line: 300,
+          before: isSubtitle ? 220 : isFirstMeta ? 140 : 20,
+          after: isSubtitle ? 80 : heading ? 80 : 20,
+          line: 260,
         },
       });
 

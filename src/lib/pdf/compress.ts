@@ -79,6 +79,10 @@ export async function compressPdf(
         width: origViewport.width,
         height: origViewport.height,
       });
+
+      // Free canvas memory immediately for multi-page documents (10-50+ pages)
+      canvas.width = 0;
+      canvas.height = 0;
     }
   }
 
@@ -101,7 +105,7 @@ export async function compressPdf(
 
   // If compressed file turns out larger than original (e.g. on already-optimized vector PDFs),
   // fallback to structural copy optimization so we never return an artificially inflated file
-  if (compressedBlob.size >= originalSize && quality === 'high') {
+  if (compressedBlob.size >= originalSize) {
     onProgress?.(92, 'Applying lossless object stream compaction...');
     const sourcePdf = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
     const fallbackPdf = await PDFDocument.create();

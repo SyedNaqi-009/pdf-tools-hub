@@ -37,9 +37,12 @@ export async function addWatermark(
     const textWidth = font.widthOfTextAtSize(text, fontSize);
     const textHeight = font.heightAtSize(fontSize);
 
-    // Center positioning
-    const x = (width - textWidth) / 2;
-    const y = (height - textHeight) / 2;
+    // Optical center positioning with exact 45-degree rotation offset
+    const rad = (45 * Math.PI) / 180;
+    const cosVal = Math.cos(rad);
+    const sinVal = Math.sin(rad);
+    const x = width / 2 - (textWidth * cosVal - textHeight * sinVal) / 2;
+    const y = height / 2 - (textWidth * sinVal + textHeight * cosVal) / 2;
 
     page.drawText(text, {
       x,
