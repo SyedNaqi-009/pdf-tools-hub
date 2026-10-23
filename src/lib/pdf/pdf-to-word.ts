@@ -360,10 +360,41 @@ export async function pdfToWord(
     }
 
     const handledTextIndices = new Set<number>();
+    interface DocBlock {
+      y: number;
+      element: Paragraph | Table;
+    }
+    const docBlocks: DocBlock[] = [];
+
+    // 1. Embed Images / Logos
+    for (const img of images) {
+      try {
+        const maxW = 500;
+        const scale = img.width > maxW ? maxW / img.width : 1;
+        docBlocks.push({
+          y: img.y,
+          element: new Paragraph({
+            children: [
+              new ImageRun({
+                data: img.data,
+                transformation: {
+                  width: Math.round(img.width * scale),
+                  height: Math.round(img.height * scale),
+                },
+                type: 'png',
+              }),
+            ],
+            spacing: { after: 120 },
+          }),
+        });
+      } catch {
+        // Skip invalid image
+      }
+    }
 
     // 2. Identify Header Banner (e.g. E-Solar Energies banner on right + Salary Slip on left)
     const headerBoxes = rects.filter(
-      (r) => r.width > 120 && r.width < pageWidth * 0.8 && r.y > 600 && colorContrast(r.color)
+      (r) => r.width > 120 && r.width < pageWidth * 0.85 && r.y > 550 && colorContrast(r.color)
     );
 
     for (const box of headerBoxes) {
@@ -376,8 +407,8 @@ export async function pdfToWord(
 
         // Check if inside box
         if (
-          item.x >= box.x - 20 &&
-          item.x <= box.x + box.width + 20 &&
+          item.x >= box.x - 30 &&
+          item.x <= box.x + box.width + 30 &&
           item.y >= box.y - 15 &&
           item.y <= box.y + box.height + 25
         ) {
@@ -385,7 +416,7 @@ export async function pdfToWord(
         }
         // Check if companion on left side of page in same vertical span
         else if (
-          item.x < box.x - 20 &&
+          item.x < box.x - 30 &&
           item.y >= box.y - 40 &&
           item.y <= box.y + box.height + 40
         ) {
@@ -408,72 +439,75 @@ export async function pdfToWord(
                 new TextRun({
                   text: item.str,
                   bold: true,
-                  size: Math.max(36, item.fontSize * 2),
-                  color: box.color, // Matching theme navy color
+                  size: Math.max(48, item.fontSize * 2),
+                  color: box.color,
+                  font: 'Arial',
                 }),
               ],
-              spacing: { after: 60 },
+              spacing: { before: 100, after: 100 },
             })
         );
 
         const rightParagraphs = rightItems.map(
-          (item) =>
+          (item, idx) =>
             new Paragraph({
               alignment: AlignmentType.CENTER,
               children: [
                 new TextRun({
                   text: item.str,
                   bold: true,
-                  size: Math.max(28, item.fontSize * 2),
+                  size: idx === 0 ? Math.max(40, item.fontSize * 2) : Math.max(30, item.fontSize * 2),
                   color: 'FFFFFF', // Crisp white on dark background box
+                  font: 'Georgia',
                 }),
               ],
-              spacing: { after: 40 },
+              spacing: { after: 30 },
             })
         );
 
-        docChildren.push(
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.NONE },
-              left: { style: BorderStyle.NONE },
-              right: { style: BorderStyle.NONE },
-              insideHorizontal: { style: BorderStyle.NONE },
-              insideVertical: { style: BorderStyle.NONE },
-            },
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: leftParagraphs.length > 0 ? leftParagraphs : [new Paragraph({ text: '' })],
-                  }),
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    shading: { type: ShadingType.CLEAR, fill: box.color, color: 'auto' },
-                    children: rightParagraphs,
-                  }),
-                ],
-              }),
-            ],
-          })
-        );
-        docChildren.push(new Paragraph({ text: '', spacing: { after: 160 } }));
+        const headerTable = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.NONE },
+            bottom: { style: BorderStyle.NONE },
+            left: { style: BorderStyle.NONE },
+            right: { style: BorderStyle.NONE },
+            insideHorizontal: { style: BorderStyle.NONE },
+            insideVertical: { style: BorderStyle.NONE },
+          },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  children: leftParagraphs.length > 0 ? leftParagraphs : [new Paragraph({ text: '' })],
+                }),
+                new TableCell({
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  shading: { type: ShadingType.CLEAR, fill: box.color, color: 'auto' },
+                  margins: { top: 160, bottom: 160, left: 200, right: 200 },
+                  children: rightParagraphs,
+                }),
+              ],
+            }),
+          ],
+        });
+
+        docBlocks.push({ y: box.y + box.height, element: headerTable });
+        docBlocks.push({ y: box.y + box.height - 1, element: new Paragraph({ text: '', spacing: { after: 140 } }) });
       }
     }
 
-    // 3. Identify Table Region (e.g. Header bar at y ~423 with width ~476, and container at y ~155)
+    // 3. Identify Table Region (exclude bottom rect by ensuring r.y > 100)
     const tableHeaderRect = rects.find(
-      (r) => r.width > 350 && r.height >= 20 && r.height <= 70 && colorContrast(r.color)
+      (r) => r.width > 300 && r.height >= 20 && r.height <= 80 && r.y > 100 && colorContrast(r.color)
     );
     const tableBodyRect = rects.find(
-      (r) => r.width > 350 && r.height > 100 && r.color !== '000000' && !colorContrast(r.color)
+      (r) => r.width > 300 && r.height > 80 && r.color !== '000000' && !colorContrast(r.color)
     );
 
     if (tableHeaderRect) {
-      // Find table header items (e.g. Earnings, Amount, sub total)
+      // Find table header items (strictly inside header rect)
       const headerItemIndices: number[] = [];
       const bodyItemIndices: number[] = [];
 
@@ -483,14 +517,14 @@ export async function pdfToWord(
         if (!item.str.trim()) continue;
 
         if (
-          item.y >= tableHeaderRect.y - 15 &&
-          item.y <= tableHeaderRect.y + tableHeaderRect.height + 15
+          item.y >= tableHeaderRect.y - 4 &&
+          item.y <= tableHeaderRect.y + tableHeaderRect.height + 4
         ) {
           headerItemIndices.push(idx);
         } else if (
           tableBodyRect &&
-          item.y >= tableBodyRect.y - 15 &&
-          item.y < tableHeaderRect.y - 10
+          item.y >= tableBodyRect.y - 10 &&
+          item.y < tableHeaderRect.y - 4
         ) {
           bodyItemIndices.push(idx);
         }
@@ -502,6 +536,19 @@ export async function pdfToWord(
 
         const headerItems = headerItemIndices.map((i) => textItems[i]).sort((a, b) => a.x - b.x);
         const bodyItems = bodyItemIndices.map((i) => textItems[i]);
+
+        const numCols = headerItems.length;
+        const colCutoffs: number[] = [];
+        for (let c = 0; c < numCols - 1; c++) {
+          colCutoffs.push((headerItems[c].x + headerItems[c + 1].x) / 2);
+        }
+
+        const getColIndex = (x: number): number => {
+          for (let c = 0; c < colCutoffs.length; c++) {
+            if (x < colCutoffs[c]) return c;
+          }
+          return numCols - 1;
+        };
 
         // Group body items into rows by Y
         const bodyLineMap: Map<number, RichTextItem[]> = new Map();
@@ -520,66 +567,95 @@ export async function pdfToWord(
 
         const sortedBodyYs = Array.from(bodyLineMap.keys()).sort((a, b) => b - a);
 
-        const numCols = Math.max(3, headerItems.length);
-        const colWidthPercent = Math.round(100 / numCols);
+        // Calculate proportional column widths
+        const colWidthPercents: number[] = [];
+        if (numCols === 3) {
+          colWidthPercents.push(46, 27, 27);
+        } else {
+          const defaultWidth = Math.round(100 / numCols);
+          for (let c = 0; c < numCols; c++) colWidthPercents.push(defaultWidth);
+        }
 
         // Build Table Rows
         const tableRows: TableRow[] = [];
 
-        // Header Row (Navy Blue with Crisp White Text)
+        // Header Row (Navy Blue with Crisp White Text, clean padding)
         const headerCells = headerItems.map(
-          (hItem) =>
+          (hItem, cIdx) =>
             new TableCell({
-              width: { size: colWidthPercent, type: WidthType.PERCENTAGE },
+              width: { size: colWidthPercents[cIdx] || 33, type: WidthType.PERCENTAGE },
               shading: { type: ShadingType.CLEAR, fill: tableHeaderRect.color, color: 'auto' },
+              margins: { top: 140, bottom: 140, left: 160, right: 160 },
               children: [
                 new Paragraph({
+                  alignment:
+                    cIdx === 0
+                      ? AlignmentType.LEFT
+                      : cIdx === numCols - 1
+                        ? AlignmentType.RIGHT
+                        : AlignmentType.CENTER,
                   children: [
                     new TextRun({
                       text: hItem.str.toUpperCase(),
                       bold: true,
                       size: 22,
                       color: 'FFFFFF', // White text on dark navy
+                      font: 'Arial',
                     }),
                   ],
                 }),
               ],
             })
         );
-        // Pad header if fewer columns
-        while (headerCells.length < numCols) {
-          headerCells.push(
-            new TableCell({
-              width: { size: colWidthPercent, type: WidthType.PERCENTAGE },
-              shading: { type: ShadingType.CLEAR, fill: tableHeaderRect.color, color: 'auto' },
-              children: [new Paragraph({ text: '' })],
-            })
-          );
-        }
         tableRows.push(new TableRow({ children: headerCells }));
 
-        // Body Rows (Light Gray Fill or Zebra)
+        // Body Rows (Clean background card, NO harsh grid borders, exact column alignment)
         for (const by of sortedBodyYs) {
-          const rowItems = bodyLineMap.get(by)!.sort((a, b) => a.x - b.x);
+          const rowItems = bodyLineMap.get(by)!;
           const isNetSalary = rowItems.some((i) => i.str.toLowerCase().includes('net salary'));
+
+          const cellsData: (RichTextItem | null)[] = new Array(numCols).fill(null);
+          for (const item of rowItems) {
+            const c = getColIndex(item.x);
+            cellsData[c] = item;
+          }
 
           const cells: TableCell[] = [];
           for (let c = 0; c < numCols; c++) {
-            const cellItem = rowItems[c];
+            const cellItem = cellsData[c];
+            const align =
+              c === 0
+                ? AlignmentType.LEFT
+                : c === numCols - 1
+                  ? AlignmentType.RIGHT
+                  : AlignmentType.CENTER;
+
             cells.push(
               new TableCell({
-                width: { size: colWidthPercent, type: WidthType.PERCENTAGE },
+                width: { size: colWidthPercents[c] || 33, type: WidthType.PERCENTAGE },
                 shading: tableBodyRect
                   ? { type: ShadingType.CLEAR, fill: tableBodyRect.color, color: 'auto' }
                   : undefined,
+                margins: {
+                  top: isNetSalary ? 160 : 100,
+                  bottom: isNetSalary ? 160 : 100,
+                  left: 160,
+                  right: 160,
+                },
                 children: [
                   new Paragraph({
+                    alignment: align,
                     children: [
                       new TextRun({
-                        text: cellItem ? cellItem.str : '',
+                        text: cellItem
+                          ? isNetSalary && c === 0
+                            ? cellItem.str.toUpperCase()
+                            : cellItem.str
+                          : '',
                         bold: isNetSalary || (cellItem ? cellItem.isBold : false),
                         size: isNetSalary ? 24 : 20,
                         color: tableHeaderRect.color, // Navy color
+                        font: 'Arial',
                       }),
                     ],
                   }),
@@ -590,26 +666,62 @@ export async function pdfToWord(
           tableRows.push(new TableRow({ children: cells }));
         }
 
-        docChildren.push(
-          new Table({
-            rows: tableRows,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 1, color: tableHeaderRect.color },
-              bottom: { style: BorderStyle.SINGLE, size: 1, color: tableHeaderRect.color },
-              left: { style: BorderStyle.SINGLE, size: 1, color: tableHeaderRect.color },
-              right: { style: BorderStyle.SINGLE, size: 1, color: tableHeaderRect.color },
-              insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: 'E2E8F0' },
-              insideVertical: { style: BorderStyle.SINGLE, size: 1, color: 'E2E8F0' },
-            },
-          })
-        );
-        docChildren.push(new Paragraph({ text: '', spacing: { after: 120 } }));
+        const contentTable = new Table({
+          rows: tableRows,
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.NONE },
+            bottom: { style: BorderStyle.NONE },
+            left: { style: BorderStyle.NONE },
+            right: { style: BorderStyle.NONE },
+            insideHorizontal: { style: BorderStyle.NONE },
+            insideVertical: { style: BorderStyle.NONE },
+          },
+        });
+
+        docBlocks.push({ y: tableHeaderRect.y + tableHeaderRect.height, element: contentTable });
+        docBlocks.push({
+          y: tableHeaderRect.y + tableHeaderRect.height - 1,
+          element: new Paragraph({ text: '', spacing: { after: 120 } }),
+        });
       }
     }
 
-    // 4. Remaining Items (Metadata, Titles, Paragraphs)
-    const remainingItems = textItems.filter((_, idx) => !handledTextIndices.has(idx) && _.str.trim().length > 0);
+    // 4. Identify Bottom Banner (Solid navy bar across bottom of page)
+    const bottomRect = rects.find(
+      (r) => r.y <= 30 && r.height >= 15 && r.width >= pageWidth * 0.8 && colorContrast(r.color)
+    );
+    if (bottomRect) {
+      const bottomBar = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+          top: { style: BorderStyle.NONE },
+          bottom: { style: BorderStyle.NONE },
+          left: { style: BorderStyle.NONE },
+          right: { style: BorderStyle.NONE },
+          insideHorizontal: { style: BorderStyle.NONE },
+          insideVertical: { style: BorderStyle.NONE },
+        },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                shading: { type: ShadingType.CLEAR, fill: bottomRect.color, color: 'auto' },
+                margins: { top: 220, bottom: 220, left: 100, right: 100 },
+                children: [new Paragraph({ text: '' })],
+              }),
+            ],
+          }),
+        ],
+      });
+      docBlocks.push({ y: 0, element: bottomBar });
+    }
+
+    // 5. Remaining Items (Metadata, Titles, Paragraphs)
+    const remainingItems = textItems.filter(
+      (_, idx) => !handledTextIndices.has(idx) && _.str.trim().length > 0
+    );
 
     const lineMap: Map<number, RichTextItem[]> = new Map();
     for (const item of remainingItems) {
@@ -630,36 +742,71 @@ export async function pdfToWord(
     for (const y of sortedYs) {
       const lineItems = lineMap.get(y)!.sort((a, b) => a.x - b.x);
 
+      let fullLineStr = lineItems.map((i) => i.str).join(' ');
+      // Clean up spaced colons like 'Department : Sales and Marketing' -> 'Department: Sales and Marketing'
+      fullLineStr = fullLineStr.replace(/ :\s*/g, ': ');
+
       const runs: TextRun[] = [];
-      for (let i = 0; i < lineItems.length; i++) {
-        const item = lineItems[i];
+      const colonIdx = fullLineStr.indexOf(':');
+      if (colonIdx !== -1 && colonIdx < 30) {
+        const label = fullLineStr.substring(0, colonIdx + 1);
+        const val = fullLineStr.substring(colonIdx + 1);
         runs.push(
           new TextRun({
-            text: (i > 0 ? ' ' : '') + item.str,
-            bold: item.isBold || item.str.endsWith(':'),
-            italics: item.isItalic,
-            size: Math.max(18, item.fontSize * 2),
-            color: item.color,
+            text: label,
+            bold: true,
+            size: 24,
+            color: '050066',
+            font: 'Arial',
+          })
+        );
+        runs.push(
+          new TextRun({
+            text: val,
+            bold: false,
+            size: 24,
+            color: '050066',
+            font: 'Arial',
+          })
+        );
+      } else {
+        const isSubtitle = fullLineStr.toLowerCase().includes('salary slip for');
+        runs.push(
+          new TextRun({
+            text: fullLineStr,
+            bold: false,
+            size: isSubtitle ? 22 : 24,
+            color: '050066',
+            font: 'Arial',
           })
         );
       }
 
+      const isSubtitle = fullLineStr.toLowerCase().includes('salary slip for');
       const maxFontInLine = Math.max(...lineItems.map((i) => i.fontSize));
       let heading: (typeof HeadingLevel)[keyof typeof HeadingLevel] | undefined;
-      if (maxFontInLine >= 18) {
+      if (maxFontInLine >= 22) {
         heading = HeadingLevel.HEADING_1;
-      } else if (maxFontInLine >= 14) {
+      } else if (maxFontInLine >= 16) {
         heading = HeadingLevel.HEADING_2;
       }
 
-      docChildren.push(
-        new Paragraph({
-          children: runs,
-          heading,
-          spacing: { after: heading ? 140 : 80, line: 260 },
-        })
-      );
+      const p = new Paragraph({
+        children: runs,
+        heading,
+        spacing: {
+          before: isSubtitle ? 180 : heading ? 120 : 40,
+          after: isSubtitle ? 140 : heading ? 100 : 70,
+          line: 260,
+        },
+      });
+
+      docBlocks.push({ y, element: p });
     }
+
+    // Sort ALL page blocks in true visual descending order (top to bottom)
+    docBlocks.sort((a, b) => b.y - a.y);
+    docChildren.push(...docBlocks.map((b) => b.element));
   }
 
   onProgress?.(88, 'Packaging into Microsoft Word OpenXML (.docx) container...');

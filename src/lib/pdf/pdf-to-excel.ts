@@ -68,72 +68,139 @@ export async function pdfToExcel(
 
     const sortedYs = Array.from(lineMap.keys()).sort((a, b) => b - a);
 
-    // Identify standard column X anchor points across the page
-    const allXs: number[] = [];
-    for (const y of sortedYs) {
-      const itemsInLine = lineMap.get(y)!;
-      itemsInLine.forEach((i) => allXs.push(i.x));
-    }
-    allXs.sort((a, b) => a - b);
+    // Helper for number/currency parsing
+    const parseNumber = (valStr: string): string | number => {
+      const cleanNumberStr = valStr
+        .replace(/[$,€£%]/g, '')
+        .replace(/\/-$/, '')
+        .replace(/,/g, '')
+        .trim();
 
-    // Cluster X coordinates within 25pt threshold to form discrete column slots
-    const columnClusters: number[] = [];
-    for (const x of allXs) {
-      const existing = columnClusters.find((c) => Math.abs(c - x) <= 25);
-      if (existing === undefined) {
-        columnClusters.push(x);
+      if (
+        cleanNumberStr !== '' &&
+        !isNaN(Number(cleanNumberStr)) &&
+        (!valStr.startsWith('0') || valStr === '0')
+      ) {
+        return Number(cleanNumberStr);
+      }
+      return valStr;
+    };
+
+    // Check for a distinct table header line (line with >= 3 items and wide horizontal spread)
+    let tableHeaderY: number | null = null;
+    let tableHeaderItems: RawPdfItem[] | null = null;
+    for (const y of sortedYs) {
+      const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
+      if (items.length >= 3 && items[items.length - 1].x - items[0].x > 200) {
+        tableHeaderY = y;
+        tableHeaderItems = items;
+        break;
       }
     }
-    columnClusters.sort((a, b) => a - b);
 
-    for (const y of sortedYs) {
-      const itemsInLine = lineMap.get(y)!;
-      itemsInLine.sort((a, b) => a.x - b.x);
+    if (tableHeaderItems && tableHeaderY !== null) {
+      // Table-driven grid layout
+      const numCols = tableHeaderItems.length;
+      const cutoffs: number[] = [];
+      for (let c = 0; c < numCols - 1; c++) {
+        cutoffs.push((tableHeaderItems[c].x + tableHeaderItems[c + 1].x) / 2);
+      }
 
-      const rowValues: Array<string | number> = new Array(columnClusters.length).fill('');
+      const getCol = (x: number): number => {
+        for (let c = 0; c < cutoffs.length; c++) {
+          if (x < cutoffs[c]) return c;
+        }
+        return numCols - 1;
+      };
 
-      for (const item of itemsInLine) {
-        // Find closest column cluster
-        let bestColIdx = 0;
-        let minDiff = Infinity;
-        for (let c = 0; c < columnClusters.length; c++) {
-          const diff = Math.abs(columnClusters[c] - item.x);
-          if (diff < minDiff) {
-            minDiff = diff;
-            bestColIdx = c;
+      for (const y of sortedYs) {
+        const itemsInLine = lineMap.get(y)!.sort((a, b) => a.x - b.x);
+
+        if (y > tableHeaderY) {
+          // Metadata or Title lines above table
+          const fullStr = itemsInLine
+            .map((i) => i.str)
+            .join(' ')
+            .replace(/ :\s*/g, ': ');
+
+          const colonIdx = fullStr.indexOf(':');
+          if (colonIdx !== -1 && colonIdx < 30) {
+            allRows.push([
+              fullStr.substring(0, colonIdx + 1).trim(),
+              fullStr.substring(colonIdx + 1).trim(),
+            ]);
+          } else if (itemsInLine.length >= 2 && itemsInLine[1].x - itemsInLine[0].x > 150) {
+            allRows.push([itemsInLine[0].str, itemsInLine.slice(1).map((i) => i.str).join(' ')]);
+          } else {
+            allRows.push([fullStr]);
+          }
+        } else {
+          // Table rows (Header + Body rows)
+          const row: Array<string | number> = new Array(numCols).fill('');
+          for (const item of itemsInLine) {
+            const c = getCol(item.x);
+            const val = parseNumber(item.str);
+            row[c] = row[c] === '' ? val : `${row[c]} ${val}`;
+          }
+          // Filter trailing empty cells
+          while (row.length > 0 && row[row.length - 1] === '') {
+            row.pop();
+          }
+          if (row.length > 0) {
+            allRows.push(row);
+          }
+        }
+      }
+    } else {
+      // General clustering fallback for non-tabular pages
+      const allXs: number[] = [];
+      for (const y of sortedYs) {
+        const itemsInLine = lineMap.get(y)!;
+        itemsInLine.forEach((i) => allXs.push(i.x));
+      }
+      allXs.sort((a, b) => a - b);
+
+      const columnClusters: number[] = [];
+      for (const x of allXs) {
+        const existing = columnClusters.find((c) => Math.abs(c - x) <= 25);
+        if (existing === undefined) {
+          columnClusters.push(x);
+        }
+      }
+      columnClusters.sort((a, b) => a - b);
+
+      for (const y of sortedYs) {
+        const itemsInLine = lineMap.get(y)!;
+        itemsInLine.sort((a, b) => a.x - b.x);
+
+        const rowValues: Array<string | number> = new Array(columnClusters.length).fill('');
+
+        for (const item of itemsInLine) {
+          let bestColIdx = 0;
+          let minDiff = Infinity;
+          for (let c = 0; c < columnClusters.length; c++) {
+            const diff = Math.abs(columnClusters[c] - item.x);
+            if (diff < minDiff) {
+              minDiff = diff;
+              bestColIdx = c;
+            }
+          }
+
+          const parsedVal = parseNumber(item.str);
+          if (rowValues[bestColIdx] === '') {
+            rowValues[bestColIdx] = parsedVal;
+          } else {
+            rowValues[bestColIdx] = `${rowValues[bestColIdx]} ${parsedVal}`;
           }
         }
 
-        // Try parsing numbers (decimals, currencies, percentages, negatives, and "/-" notation)
-        let parsedVal: string | number = item.str;
-        const cleanNumberStr = item.str
-          .replace(/[$,€£%]/g, '')
-          .replace(/\/-$/, '')
-          .replace(/,/g, '')
-          .trim();
-
-        if (
-          cleanNumberStr !== '' &&
-          !isNaN(Number(cleanNumberStr)) &&
-          (!item.str.startsWith('0') || item.str === '0') // preserve leading zeros for codes/IDs unless just '0'
-        ) {
-          parsedVal = Number(cleanNumberStr);
+        while (rowValues.length > 0 && rowValues[rowValues.length - 1] === '') {
+          rowValues.pop();
         }
 
-        if (rowValues[bestColIdx] === '') {
-          rowValues[bestColIdx] = parsedVal;
-        } else {
-          rowValues[bestColIdx] = `${rowValues[bestColIdx]} ${parsedVal}`;
+        if (rowValues.length > 0) {
+          allRows.push(rowValues);
         }
-      }
-
-      // Filter trailing empty cells
-      while (rowValues.length > 0 && rowValues[rowValues.length - 1] === '') {
-        rowValues.pop();
-      }
-
-      if (rowValues.length > 0) {
-        allRows.push(rowValues);
       }
     }
 
