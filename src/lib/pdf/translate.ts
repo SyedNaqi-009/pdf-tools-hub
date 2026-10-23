@@ -29,33 +29,53 @@ export const SUPPORTED_LANGUAGES = [
 ] as const;
 
 /**
- * Free, reliable text translation chunker
+ * Timeout-guarded text translation request (will NEVER hang indefinitely)
+ */
+async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
+/**
+ * Robust Multi-Provider Translation Chunk Handler with Strict Timeout
  */
 async function translateTextChunk(text: string, targetLang: string): Promise<string> {
-  if (!text || !text.trim()) return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
 
+  // 1. Primary: Google Translate single-element API with 8s timeout
   try {
-    // Primary: Google Translate single-element API
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(
       targetLang
-    )}&dt=t&q=${encodeURIComponent(text)}`;
-    const res = await fetch(url);
+    )}&dt=t&q=${encodeURIComponent(trimmed)}`;
+    const res = await fetchWithTimeout(url, 7000);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && Array.isArray(data[0])) {
-        return data[0].map((item: unknown[]) => (item && item[0] ? item[0] : '')).join('');
+        const translated = data[0]
+          .map((item: unknown[]) => (item && item[0] ? item[0] : ''))
+          .join('');
+        if (translated) return translated;
       }
     }
   } catch {
-    // fallback attempt below
+    // Proceed to secondary fallback
   }
 
+  // 2. Secondary: MyMemory API with 8s timeout
   try {
-    // Secondary fallback: MyMemory Translation API
     const fallbackUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
-      text
+      trimmed.slice(0, 500)
     )}&langpair=autodetect|${encodeURIComponent(targetLang)}`;
-    const res2 = await fetch(fallbackUrl);
+    const res2 = await fetchWithTimeout(fallbackUrl, 7000);
     if (res2.ok) {
       const data2 = await res2.json();
       if (data2?.responseData?.translatedText) {
@@ -63,21 +83,22 @@ async function translateTextChunk(text: string, targetLang: string): Promise<str
       }
     }
   } catch {
-    // return original text if translation service unreachable
+    // Proceed to tertiary fallback
   }
 
-  return text;
+  // 3. If remote providers fail or timeout, return original text rather than hanging or crashing
+  return trimmed;
 }
 
 /**
- * Translate a PDF document text page-by-page and create a new translated PDF.
+ * Timeout-safe PDF Document Translation
  */
 export async function translatePdf(
   file: File,
   targetLang: string = 'es',
   onProgress?: ProgressCallback
 ): Promise<Blob> {
-  onProgress?.(5, 'Initializing PDF parser and language engine...');
+  onProgress?.(5, 'Initializing PDF text extractor & translation pipeline...');
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
@@ -86,8 +107,7 @@ export async function translatePdf(
   const pdfDoc = await loadingTask.promise;
   const numPages = pdfDoc.numPages;
 
-  onProgress?.(15, `Extracting and analyzing ${numPages} page(s)...`);
-
+  onProgress?.(15, `Extracting textual paragraphs from ${numPages} page(s)...`);
   const translatedPagesText: string[][] = [];
 
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
@@ -116,16 +136,14 @@ export async function translatePdf(
       pageParagraphs = ['[No readable text detected on this page]'];
     }
 
-    // Translate paragraphs
     const translatedParagraphs: string[] = [];
     for (let pIdx = 0; pIdx < pageParagraphs.length; pIdx++) {
       const paragraph = pageParagraphs[pIdx];
-      const prog = Math.round(15 + ((pageNum - 1 + pIdx / pageParagraphs.length) / numPages) * 65);
+      const prog = Math.round(15 + ((pageNum - 1 + (pIdx + 1) / pageParagraphs.length) / numPages) * 65);
       onProgress?.(prog, `Translating page ${pageNum} (${pIdx + 1}/${pageParagraphs.length})...`);
-      
-      if (paragraph.length > 1500) {
-        // chunk long paragraphs
-        const subChunks = paragraph.match(/.{1,1200}(\s|$)/g) || [paragraph];
+
+      if (paragraph.length > 1200) {
+        const subChunks = paragraph.match(/.{1,900}(\s|$)/g) || [paragraph];
         let subRes = '';
         for (const sub of subChunks) {
           subRes += (await translateTextChunk(sub, targetLang)) + ' ';
@@ -140,9 +158,7 @@ export async function translatePdf(
     translatedPagesText.push(translatedParagraphs);
   }
 
-  onProgress?.(85, 'Assembling translated PDF document...');
-
-  // Create new PDF with pdf-lib
+  onProgress?.(85, 'Assembling translated PDF layout...');
   const newPdf = await PDFDocument.create();
   const font = await newPdf.embedFont(StandardFonts.Helvetica);
   const boldFont = await newPdf.embedFont(StandardFonts.HelveticaBold);
@@ -164,7 +180,7 @@ export async function translatePdf(
       y,
       size: 10,
       font: boldFont,
-      color: rgb(0.86, 0.15, 0.15), // Crimson
+      color: rgb(0.15, 0.35, 0.9), // Blue accent
     });
 
     page.drawText(`Page ${i + 1} of ${translatedPagesText.length}`, {
@@ -185,9 +201,8 @@ export async function translatePdf(
     y -= 20;
 
     for (const para of paragraphs) {
-      if (y < margin + 40) break; // prevent overflowing page
+      if (y < margin + 40) break;
 
-      // Wrap text
       const words = para.split(' ');
       let line = '';
       for (const word of words) {
@@ -195,37 +210,36 @@ export async function translatePdf(
         const testWidth = font.widthOfTextAtSize(testLine, 10);
         if (testWidth > maxWidth) {
           if (y < margin + 20) break;
-          // Sanitize characters for standard Helvetica font
-          const safeLine = line.replace(/[^\x00-\x7F]/g, '?');
-          page.drawText(safeLine, {
+          // Standard Helvetica encoding fallback
+          const safeLine = line.replace(/[^\x00-\x7F]/g, ' ');
+          page.drawText(safeLine || line, {
             x: margin,
             y,
             size: 10,
             font,
-            color: rgb(0.1, 0.1, 0.1),
+            color: rgb(0.12, 0.16, 0.23),
           });
-          y -= 14;
+          y -= 15;
           line = word;
         } else {
           line = testLine;
         }
       }
       if (line && y >= margin + 20) {
-        const safeLine = line.replace(/[^\x00-\x7F]/g, '?');
-        page.drawText(safeLine, {
+        const safeLine = line.replace(/[^\x00-\x7F]/g, ' ');
+        page.drawText(safeLine || line, {
           x: margin,
           y,
           size: 10,
           font,
-          color: rgb(0.1, 0.1, 0.1),
+          color: rgb(0.12, 0.16, 0.23),
         });
         y -= 22;
       }
     }
   }
 
-  onProgress?.(98, 'Packaging final PDF...');
+  onProgress?.(100, 'Translated document generated successfully.');
   const pdfBytes = await newPdf.save();
-  onProgress?.(100, 'Translation complete!');
   return new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
 }

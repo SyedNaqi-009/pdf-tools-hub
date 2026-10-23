@@ -16,6 +16,7 @@ import SectionHeading from '@/components/ui/SectionHeading';
 import ToolCard from '@/components/tools/ToolCard';
 import ToolLogo from '@/components/tools/ToolLogo';
 import CategoryFilteredTools from '@/components/tools/CategoryFilteredTools';
+import UniversalConverter from '@/components/tools/UniversalConverter';
 import FAQAccordion from '@/components/ui/FAQAccordion';
 import { getTier1Tools, TOOLS, TOOL_CATEGORIES } from '@/lib/tools-data';
 import { getHomeStructuredData, SITE_URL } from '@/lib/seo';
@@ -129,13 +130,13 @@ export default function HomePage() {
 
                 {/* Direct Action Deck */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
-                  <Link
-                    href="/tools/pdf-to-word"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 py-3.5 text-sm sm:text-base font-black text-white shadow-xl shadow-blue-950/40 hover:bg-blue-500 hover:shadow-2xl transition-all active:scale-98 uppercase tracking-wider"
+                  <a
+                    href="#universal-converter"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 py-3.5 text-sm sm:text-base font-black text-white shadow-xl shadow-blue-950/40 hover:bg-blue-500 hover:shadow-2xl transition-all active:scale-98 uppercase tracking-wider cursor-pointer"
                   >
                     <span>Start Converting</span>
                     <ArrowRight className="h-5 w-5" />
-                  </Link>
+                  </a>
 
                   <Link
                     href="/tools"
@@ -235,6 +236,15 @@ export default function HomePage() {
               </div>
 
             </div>
+          </Container>
+        </section>
+
+        {/* =========================================================================
+            SECTION 1.5: UNIVERSAL FILE CONVERSION WORKSPACE (PHASE 2)
+        ========================================================================= */}
+        <section id="universal-converter" className="py-12 sm:py-16 bg-zinc-100/70 border-b border-zinc-200 scroll-mt-20">
+          <Container>
+            <UniversalConverter />
           </Container>
         </section>
 

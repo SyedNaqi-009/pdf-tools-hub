@@ -27,6 +27,7 @@ import ProcessingStatus from './ProcessingStatus';
 import DownloadButton from './DownloadButton';
 import { ToolItem, getRelatedTools } from '@/lib/tools-data';
 import { getToolStructuredData } from '@/lib/seo';
+import { ConversionQuality, QUALITY_PRESETS } from '@/lib/conversion-registry';
 
 interface ToolPageLayoutProps {
   tool: ToolItem;
@@ -45,6 +46,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultBlobs, setResultBlobs] = useState<Blob[]>([]);
   const [resultFilename, setResultFilename] = useState(tool.outputFilename);
+  const [quality, setQuality] = useState<ConversionQuality>('medium');
 
   // Tool Specific Options
   const [rotationAngle, setRotationAngle] = useState<90 | 180 | 270>(90);
@@ -220,7 +222,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'compress-pdf': {
           const { compressPdf } = await import('@/lib/pdf/compress');
-          const blob = await compressPdf(files[0], updateProgress);
+          const blob = await compressPdf(files[0], quality, updateProgress);
           setResultBlob(blob);
           setResultFilename(`compressed-${files[0].name}`);
           break;
@@ -263,7 +265,9 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'pdf-to-jpg': {
           const { pdfToImage } = await import('@/lib/pdf/pdf-to-image');
-          const blobs = await pdfToImage(files[0], { format: 'image/jpeg' }, updateProgress);
+          const scale = quality === 'low' ? 1.2 : quality === 'medium' ? 1.8 : 2.5;
+          const qVal = quality === 'low' ? 0.6 : quality === 'medium' ? 0.82 : 0.95;
+          const blobs = await pdfToImage(files[0], { format: 'image/jpeg', scale, quality: qVal }, updateProgress);
           setResultBlobs(blobs);
           if (blobs.length > 0) setResultBlob(blobs[0]);
           setResultFilename('page-1.jpg');
@@ -280,7 +284,8 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'pdf-to-png': {
           const { pdfToImage } = await import('@/lib/pdf/pdf-to-image');
-          const blobs = await pdfToImage(files[0], { format: 'image/png' }, updateProgress);
+          const scale = quality === 'low' ? 1.2 : quality === 'medium' ? 1.8 : 2.5;
+          const blobs = await pdfToImage(files[0], { format: 'image/png', scale }, updateProgress);
           setResultBlobs(blobs);
           if (blobs.length > 0) setResultBlob(blobs[0]);
           setResultFilename('page-1.png');
@@ -297,7 +302,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'word-to-pdf': {
           const { wordToPdf } = await import('@/lib/pdf/word-to-pdf');
-          const blob = await wordToPdf(files[0], updateProgress);
+          const blob = await wordToPdf(files[0], quality, updateProgress);
           setResultBlob(blob);
           setResultFilename(`${files[0].name.replace(/\.[^/.]+$/, '')}.pdf`);
           break;
@@ -305,7 +310,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'pdf-to-word': {
           const { pdfToWord } = await import('@/lib/pdf/pdf-to-word');
-          const blob = await pdfToWord(files[0], updateProgress);
+          const blob = await pdfToWord(files[0], quality, updateProgress);
           setResultBlob(blob);
           setResultFilename(`${files[0].name.replace(/\.[^/.]+$/, '')}.docx`);
           break;
@@ -321,7 +326,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'pdf-to-excel': {
           const { pdfToExcel } = await import('@/lib/pdf/pdf-to-excel');
-          const blob = await pdfToExcel(files[0], updateProgress);
+          const blob = await pdfToExcel(files[0], quality, updateProgress);
           setResultBlob(blob);
           setResultFilename(`${files[0].name.replace(/\.[^/.]+$/, '')}.xlsx`);
           break;
@@ -532,6 +537,49 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                     </h3>
                     <span className="text-[10px] font-mono text-zinc-500">READY TO EXECUTE</span>
                   </div>
+
+                  {/* Quality Preset Selector for Quality-Supported Tools */}
+                  {['compress-pdf', 'pdf-to-word', 'word-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-jpg', 'pdf-to-png', 'jpg-to-pdf', 'png-to-pdf', 'pdf-to-powerpoint', 'powerpoint-to-pdf'].includes(tool.slug) && (
+                    <div className="space-y-2 pb-4 border-b border-zinc-200">
+                      <span className="text-xs font-bold text-zinc-700 uppercase font-mono block">
+                        Output Quality & Compression Level:
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {(['low', 'medium', 'high'] as ConversionQuality[]).map((q) => {
+                          const preset = QUALITY_PRESETS[q];
+                          const isSelected = quality === q;
+                          return (
+                            <button
+                              key={q}
+                              type="button"
+                              onClick={() => setQuality(q)}
+                              className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
+                                  : 'border-zinc-200 bg-white hover:border-zinc-300'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-black text-zinc-900 uppercase">
+                                  {q} Quality
+                                </span>
+                                <span
+                                  className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                                    isSelected ? 'bg-blue-600 text-white' : 'bg-zinc-100 text-zinc-600'
+                                  }`}
+                                >
+                                  {preset.badge}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-zinc-500 leading-tight">
+                                {preset.description}
+                              </p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Rotate PDF Options */}
                   {tool.slug === 'rotate-pdf' && (
@@ -845,6 +893,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                   onReset={handleReset}
                   fileName={resultFilename}
                   fileSizeBytes={resultBlob.size}
+                  originalSizeBytes={files[0]?.size}
                   label={`Download ${tool.outputExtension.toUpperCase()}`}
                 />
               )}
