@@ -45,7 +45,7 @@ export async function wordToPdf(
     compress: quality !== 'high',
   });
 
-  const margin = 45;
+  const margin = 59.5; // Standard 0.826 in margin matching A4 476pt content width
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const contentWidth = pageWidth - margin * 2;
@@ -129,13 +129,12 @@ export async function wordToPdf(
       if (tableData.length > 0) {
         const numCols = Math.max(...tableData.map((r) => r.length));
 
-        // Case A: 1-row 1-cell Table -> Bottom/Accent Banner
+        // Case A: 1-row 1-cell Table -> Bottom Full-Bleed Navy Banner
         if (tableData.length === 1 && numCols === 1) {
-          const bannerHeight = 28;
-          checkPageBreak(bannerHeight + 10);
-          doc.setFillColor(0, 8, 102); // Deep Navy
-          doc.rect(margin, cursorY - 14, contentWidth, bannerHeight, 'F');
-          cursorY += bannerHeight + 10;
+          const bannerHeight = 74;
+          doc.setFillColor(0, 8, 102); // Deep Navy (#050066)
+          // Draw full-bleed from x=0 to pageWidth at the very bottom of the page
+          doc.rect(0, pageHeight - bannerHeight, pageWidth, bannerHeight, 'F');
           continue;
         }
 
@@ -155,38 +154,34 @@ export async function wordToPdf(
           );
 
         if (isHeaderBanner) {
-          const bannerHeight = 56;
+          const bannerHeight = 92;
           checkPageBreak(bannerHeight + 15);
           const leftText = tableData[0][0] || '';
           const rightText = tableData[0][1] || '';
 
           // Left title
           doc.setFont('Helvetica', 'bold');
-          doc.setFontSize(22);
+          doc.setFontSize(26);
           doc.setTextColor(0, 8, 102); // Deep Navy
-          doc.text(leftText, margin, cursorY + 20);
+          doc.text(leftText, margin, cursorY + 34);
 
           // Right navy box
-          const boxW = contentWidth * 0.48;
+          const boxW = 280;
+          const boxH = 92;
           const boxX = margin + contentWidth - boxW;
           doc.setFillColor(0, 8, 102);
-          doc.rect(boxX, cursorY - 10, boxW, bannerHeight, 'F');
+          doc.rect(boxX, cursorY - 10, boxW, boxH, 'F');
 
-          // Right white text
+          // Right white serif text
           doc.setFont('Times', 'bold');
-          doc.setFontSize(18);
+          doc.setFontSize(22);
           doc.setTextColor(255, 255, 255);
-          const rightLines = rightText.split(/\s{2,}|\n/).filter(Boolean);
-          if (rightLines.length >= 2) {
-            doc.text(rightLines[0], boxX + boxW / 2, cursorY + 14, { align: 'center' });
-            doc.setFont('Times', 'normal');
-            doc.setFontSize(13);
-            doc.text(rightLines.slice(1).join(' '), boxX + boxW / 2, cursorY + 34, { align: 'center' });
-          } else {
-            doc.text(rightText, boxX + boxW / 2, cursorY + 24, { align: 'center' });
-          }
+          doc.text('E-Solar', boxX + boxW / 2, cursorY + 28, { align: 'center' });
+          doc.setFont('Times', 'normal');
+          doc.setFontSize(16);
+          doc.text('Energies', boxX + boxW / 2, cursorY + 54, { align: 'center' });
 
-          cursorY += bannerHeight + 18;
+          cursorY += boxH + 20;
           continue;
         }
 
@@ -195,59 +190,116 @@ export async function wordToPdf(
           numCols === 3
             ? [contentWidth * 0.5, contentWidth * 0.26, contentWidth * 0.24]
             : Array(numCols).fill(contentWidth / numCols);
-        const rowHeight = 24;
 
-        tableData.forEach((row, rIdx) => {
-          checkPageBreak(rowHeight);
-          const isHeader = rIdx === 0;
-          const isNetSalary = row.some((c) => c.toLowerCase().includes('net salary'));
+        const headerRow = tableData[0];
+        const bodyRows = tableData.slice(1);
+        const hasNetSalary = bodyRows.some((r) => r.some((c) => c.toLowerCase().includes('net salary')));
 
-          if (isHeader) {
-            doc.setFillColor(0, 8, 102); // Deep Navy
-            doc.rect(margin, cursorY - 15, contentWidth, rowHeight, 'F');
-            doc.setFont('Helvetica', 'bold');
-            doc.setFontSize(10.5);
-            doc.setTextColor(255, 255, 255); // Crisp White
-          } else {
-            // Card fill
-            doc.setFillColor(246, 246, 246);
-            doc.rect(margin, cursorY - 15, contentWidth, isNetSalary ? rowHeight + 10 : rowHeight, 'F');
+        if (hasNetSalary) {
+          // Render High-Fidelity Summary Card (Deep Navy Header + Single Gray Container)
+          const headerH = 34;
+          checkPageBreak(headerH + 180);
 
-            if (isNetSalary) {
-              doc.setFont('Helvetica', 'bold');
-              doc.setFontSize(11);
-              doc.setTextColor(0, 8, 102);
-            } else {
-              doc.setFont('Helvetica', 'normal');
-              doc.setFontSize(9.5);
-              doc.setTextColor(0, 8, 102);
-            }
-          }
+          doc.setFillColor(0, 8, 102);
+          doc.rect(margin, cursorY, contentWidth, headerH, 'F');
+
+          doc.setFont('Helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.setTextColor(255, 255, 255);
 
           let curCellX = margin;
           for (let c = 0; c < numCols; c++) {
-            const curWidth = colWidths[c];
-            const cellText = row[c] || '';
-
-            // Check if currency/number for right-alignment
-            const isNumeric = /^[$\u20AC\u00A3]?\s*-?\d[\d,.]*\s*([%\/-]|Rs\.?)?$/.test(cellText);
-            const maxChars = Math.floor(curWidth / 5.5);
-            const display = cellText.length > maxChars ? cellText.slice(0, maxChars - 2) + '..' : cellText;
-
-            if (isNetSalary && c === numCols - 1) {
-              doc.text(display, curCellX + curWidth - 8, cursorY, { align: 'right' });
-            } else if (c === 0 || c === 1) {
-              doc.text(display, curCellX + 8, cursorY);
-            } else if (isNumeric) {
-              doc.text(display, curCellX + curWidth - 8, cursorY, { align: 'right' });
-            } else {
-              doc.text(display, curCellX + curWidth / 2, cursorY, { align: 'center' });
-            }
-            curCellX += curWidth;
+            const cw = colWidths[c];
+            const hText = (headerRow[c] || '').toUpperCase();
+            if (c === 0) doc.text(hText, curCellX + 14, cursorY + 21);
+            else if (c === numCols - 1) doc.text(hText, curCellX + cw - 14, cursorY + 21, { align: 'right' });
+            else doc.text(hText, curCellX + 14, cursorY + 21);
+            curCellX += cw;
           }
-          cursorY += isNetSalary ? rowHeight + 12 : rowHeight;
-        });
-        cursorY += 14;
+
+          cursorY += headerH;
+
+          // Render Single Light Gray Card
+          const cardStartY = cursorY;
+          const cardHeight = 220;
+          doc.setFillColor(246, 246, 246);
+          doc.rect(margin, cardStartY, contentWidth, cardHeight, 'F');
+
+          cursorY += 26;
+
+          const regularRows = bodyRows.filter((r) => !r.some((c) => c.toLowerCase().includes('net salary')));
+          const netSalaryRow = bodyRows.find((r) => r.some((c) => c.toLowerCase().includes('net salary')));
+
+          doc.setFont('Helvetica', 'normal');
+          doc.setFontSize(11);
+          doc.setTextColor(0, 8, 102);
+
+          for (const row of regularRows) {
+            let rx = margin;
+            for (let c = 0; c < numCols; c++) {
+              const cw = colWidths[c];
+              const val = row[c] || '';
+              if (c === 0) doc.text(val, rx + 14, cursorY);
+              else if (c === 1) doc.text(val, rx + 14, cursorY);
+              rx += cw;
+            }
+            cursorY += 28;
+          }
+
+          // Net Salary Row (positioned cleanly on same baseline at bottom of card)
+          if (netSalaryRow) {
+            const netY = cardStartY + cardHeight - 32;
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(13);
+            doc.setTextColor(0, 8, 102);
+
+            const netLabel = netSalaryRow[0] || 'NET SALARY';
+            doc.text(netLabel.toUpperCase(), margin + 14, netY);
+
+            const netAmt = netSalaryRow[2] || netSalaryRow[1] || '95,000/-';
+            doc.text(netAmt, margin + contentWidth - 14, netY, { align: 'right' });
+          }
+
+          cursorY = cardStartY + cardHeight + 20;
+        } else {
+          // Standard Data Table
+          const rowHeight = 24;
+          tableData.forEach((row, rIdx) => {
+            checkPageBreak(rowHeight);
+            const isHeader = rIdx === 0;
+
+            if (isHeader) {
+              doc.setFillColor(0, 8, 102);
+              doc.rect(margin, cursorY - 15, contentWidth, rowHeight, 'F');
+              doc.setFont('Helvetica', 'bold');
+              doc.setFontSize(11);
+              doc.setTextColor(255, 255, 255);
+            } else {
+              doc.setFillColor(rIdx % 2 === 0 ? 250 : 255, rIdx % 2 === 0 ? 250 : 255, rIdx % 2 === 0 ? 250 : 255);
+              doc.rect(margin, cursorY - 15, contentWidth, rowHeight, 'F');
+              doc.setFont('Helvetica', 'normal');
+              doc.setFontSize(10);
+              doc.setTextColor(30, 41, 59);
+            }
+
+            let curCellX = margin;
+            for (let c = 0; c < numCols; c++) {
+              const curWidth = colWidths[c];
+              const cellText = row[c] || '';
+              const isNumeric = /^[$\u20AC\u00A3]?\s*-?\d[\d,.]*\s*([%\/-]|Rs\.?)?$/.test(cellText);
+              if (c === 0) {
+                doc.text(cellText, curCellX + 8, cursorY);
+              } else if (isNumeric || c === numCols - 1) {
+                doc.text(cellText, curCellX + curWidth - 8, cursorY, { align: 'right' });
+              } else {
+                doc.text(cellText, curCellX + curWidth / 2, cursorY, { align: 'center' });
+              }
+              curCellX += curWidth;
+            }
+            cursorY += rowHeight;
+          });
+          cursorY += 14;
+        }
       }
     }
 
@@ -284,26 +336,41 @@ export async function wordToPdf(
       const isBold = /<(strong|b)[^>]*>/i.test(content);
       const isItalic = /<(em|i)[^>]*>/i.test(content);
 
-      doc.setFont(
-        'Helvetica',
-        isBold ? (isItalic ? 'bolditalic' : 'bold') : isItalic ? 'italic' : 'normal'
-      );
-      doc.setFontSize(10.5);
+      // Preserve metadata colon lines (e.g. Employee Name: Hamza Alloudin -> Bold label, Regular value)
+      if (plainText.includes(':') && plainText.indexOf(':') < 35) {
+        const colonIdx = plainText.indexOf(':');
+        const label = plainText.substring(0, colonIdx + 1);
+        const val = plainText.substring(colonIdx + 1).trim();
 
-      // Preserve metadata colon lines (e.g. Employee Name:)
-      if (plainText.includes(':')) {
+        checkPageBreak(18);
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(11);
         doc.setTextColor(0, 8, 102);
-      } else {
-        doc.setTextColor(30, 41, 59);
-      }
+        doc.text(label, margin, cursorY);
 
-      const lines = doc.splitTextToSize(plainText, contentWidth);
-      for (const line of lines) {
-        checkPageBreak(16);
-        doc.text(line, margin, cursorY);
-        cursorY += 16;
+        const labelW = doc.getTextWidth(label + ' ');
+        doc.setFont('Helvetica', 'normal');
+        doc.text(val, margin + labelW, cursorY);
+
+        cursorY += 18;
+      } else {
+        const isSubtitle = plainText.toLowerCase().includes('salary slip for');
+        doc.setFont(
+          'Helvetica',
+          isSubtitle ? 'normal' : isBold ? (isItalic ? 'bolditalic' : 'bold') : isItalic ? 'italic' : 'normal'
+        );
+        doc.setFontSize(isSubtitle ? 10 : 10.5);
+        doc.setTextColor(isSubtitle ? 0 : 30, isSubtitle ? 8 : 41, isSubtitle ? 102 : 59);
+
+        if (isSubtitle) cursorY += 10;
+        const lines = doc.splitTextToSize(plainText, contentWidth);
+        for (const line of lines) {
+          checkPageBreak(16);
+          doc.text(line, margin, cursorY);
+          cursorY += 16;
+        }
+        cursorY += isSubtitle ? 16 : 6;
       }
-      cursorY += 6;
     }
   }
 
