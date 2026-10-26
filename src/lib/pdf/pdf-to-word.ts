@@ -14,6 +14,7 @@ import {
   HeadingLevel,
   PageBreak,
   VerticalAlign,
+  Footer,
 } from 'docx';
 import { ProgressCallback } from './merge';
 import { ConversionQuality } from '../conversion-registry';
@@ -298,18 +299,16 @@ async function extractPageContent(
       fontLower.includes('900');
     const isItalic = fontLower.includes('italic') || fontLower.includes('oblique');
 
-    // Resolve native font family
-    let fontFamily = 'Arial';
-    if (fontLower.includes('poppins')) fontFamily = 'Poppins';
-    else if (fontLower.includes('bebas')) fontFamily = 'Bebas Neue';
-    else if (fontLower.includes('bevan')) fontFamily = 'Bevan';
-    else if (fontLower.includes('georgia')) fontFamily = 'Georgia';
+    // Resolve native font family matching clean Word typography
+    let fontFamily = 'Poppins';
+    if (fontLower.includes('bevan') || fontLower.includes('georgia') || fontLower.includes('serif')) fontFamily = 'Georgia';
     else if (fontLower.includes('times')) fontFamily = 'Times New Roman';
+    else if (fontLower.includes('bebas')) fontFamily = 'Poppins';
+    else if (fontLower.includes('poppins')) fontFamily = 'Poppins';
     else if (fontLower.includes('calibri')) fontFamily = 'Calibri';
     else if (fontLower.includes('roboto')) fontFamily = 'Roboto';
     else if (fontLower.includes('courier')) fontFamily = 'Courier New';
     else if (fontLower.includes('sans')) fontFamily = 'Arial';
-    else if (fontLower.includes('serif')) fontFamily = 'Georgia';
 
     let color = '050066'; // Default to deep navy if unspecified
     if (showTextIdx < colorAtTextIndex.length && colorAtTextIndex[showTextIdx] !== '000000') {
@@ -356,6 +355,7 @@ export async function pdfToWord(
 
   const docSections: Array<{
     properties: { page: { margin: { top: number; right: number; bottom: number; left: number } } };
+    footers?: { default?: Footer };
     children: (Paragraph | Table)[];
   }> = [];
 
@@ -450,12 +450,12 @@ export async function pdfToWord(
                 new TextRun({
                   text: item.str,
                   bold: true,
-                  size: Math.max(52, Math.round(item.fontSize * 2)),
+                  size: 46, // 23pt clean proportion matching iLovePDF
                   color: box.color,
                   font: item.fontFamily || 'Poppins',
                 }),
               ],
-              spacing: { before: 140, after: 140 },
+              spacing: { before: 80, after: 80 },
             })
         );
 
@@ -469,8 +469,8 @@ export async function pdfToWord(
                   bold: idx === 0,
                   size:
                     idx === 0
-                      ? Math.max(48, Math.round(item.fontSize * 2))
-                      : Math.max(34, Math.round(item.fontSize * 2)),
+                      ? 44 // 22pt Georgia Serif
+                      : 32, // 16pt Georgia Serif
                   color: 'FFFFFF', // Crisp white on dark background box
                   font: item.fontFamily || 'Georgia',
                 }),
@@ -493,15 +493,16 @@ export async function pdfToWord(
             new TableRow({
               children: [
                 new TableCell({
-                  width: { size: 48, type: WidthType.PERCENTAGE },
+                  width: { size: 52, type: WidthType.PERCENTAGE },
                   verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 120, bottom: 120, left: 0, right: 120 },
                   children: leftParagraphs.length > 0 ? leftParagraphs : [new Paragraph({ text: '' })],
                 }),
                 new TableCell({
-                  width: { size: 52, type: WidthType.PERCENTAGE },
+                  width: { size: 48, type: WidthType.PERCENTAGE },
                   shading: { type: ShadingType.CLEAR, fill: box.color, color: 'auto' },
                   verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 200, bottom: 200, left: 240, right: 240 },
+                  margins: { top: 220, bottom: 220, left: 240, right: 240 },
                   children: rightParagraphs,
                 }),
               ],
@@ -604,7 +605,7 @@ export async function pdfToWord(
             new TableCell({
               width: { size: colWidthPercents[cIdx] || 33, type: WidthType.PERCENTAGE },
               shading: { type: ShadingType.CLEAR, fill: tableHeaderRect.color, color: 'auto' },
-              margins: { top: 160, bottom: 160, left: 200, right: 180 },
+              margins: { top: 140, bottom: 140, left: 160, right: 160 },
               children: [
                 new Paragraph({
                   alignment:
@@ -617,9 +618,9 @@ export async function pdfToWord(
                     new TextRun({
                       text: hItem.str.toUpperCase(),
                       bold: true,
-                      size: 34, // 17pt Bebas Neue
+                      size: 24, // 12pt clean proportion (NOT Bebas Neue)
                       color: 'FFFFFF', // White text on dark navy
-                      font: 'Bebas Neue',
+                      font: 'Poppins',
                     }),
                   ],
                 }),
@@ -628,7 +629,7 @@ export async function pdfToWord(
         );
         tableRows.push(new TableRow({ children: headerCells }));
 
-        // Body Rows (Clean background card, NO harsh grid borders, exact column alignment)
+        // Body Rows (Clean White Background, NO harsh grid borders, exact column alignment)
         for (const by of sortedBodyYs) {
           const rowItems = bodyLineMap.get(by)!;
           const isNetSalary = rowItems.some((i) => i.str.toLowerCase().includes('net salary'));
@@ -652,14 +653,11 @@ export async function pdfToWord(
             cells.push(
               new TableCell({
                 width: { size: colWidthPercents[c] || 33, type: WidthType.PERCENTAGE },
-                shading: tableBodyRect
-                  ? { type: ShadingType.CLEAR, fill: tableBodyRect.color, color: 'auto' }
-                  : undefined,
                 margins: {
-                  top: isNetSalary ? 280 : 100,
-                  bottom: isNetSalary ? 240 : 100,
-                  left: 200,
-                  right: 180,
+                  top: isNetSalary ? 220 : 80,
+                  bottom: isNetSalary ? 180 : 80,
+                  left: 160,
+                  right: 160,
                 },
                 children: [
                   new Paragraph({
@@ -673,14 +671,10 @@ export async function pdfToWord(
                           : '',
                         bold: isNetSalary || (cellItem ? cellItem.isBold : false),
                         size: isNetSalary
-                          ? 34
-                          : Math.max(22, Math.round((cellItem ? cellItem.fontSize : 12) * 2)),
+                          ? 26 // 13pt bold sans-serif
+                          : 22, // 11pt clean proportion
                         color: tableHeaderRect.color, // Navy color
-                        font: isNetSalary
-                          ? 'Bebas Neue'
-                          : cellItem
-                            ? cellItem.fontFamily
-                            : 'Poppins',
+                        font: cellItem?.fontFamily || 'Poppins',
                       }),
                     ],
                   }),
@@ -716,6 +710,7 @@ export async function pdfToWord(
     const bottomRect = rects.find(
       (r) => (r.y <= 120 || r.y >= 700) && r.height >= 15 && r.width >= pageWidth * 0.8 && colorContrast(r.color)
     );
+    let pageFooter: Footer | undefined;
     if (bottomRect) {
       const bottomBar = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
@@ -733,14 +728,15 @@ export async function pdfToWord(
               new TableCell({
                 width: { size: 100, type: WidthType.PERCENTAGE },
                 shading: { type: ShadingType.CLEAR, fill: bottomRect.color, color: 'auto' },
-                margins: { top: 240, bottom: 240, left: 100, right: 100 },
+                margins: { top: 240, bottom: 240, left: 0, right: 0 },
                 children: [new Paragraph({ text: '' })],
               }),
             ],
           }),
         ],
       });
-      docBlocks.push({ y: 0, element: bottomBar });
+      // Attach to page footer so it pins cleanly to the bottom margin like iLovePDF
+      pageFooter = new Footer({ children: [bottomBar] });
     }
 
     // 5. Remaining Items (Metadata, Titles, Paragraphs)
@@ -839,9 +835,10 @@ export async function pdfToWord(
     docSections.push({
       properties: {
         page: {
-          margin: { top: 720, right: 540, bottom: 200, left: 540 },
+          margin: { top: 720, right: 1080, bottom: 500, left: 1080 },
         },
       },
+      footers: pageFooter ? { default: pageFooter } : undefined,
       children:
         docBlocks.length > 0
           ? docBlocks.map((b) => b.element)
@@ -858,7 +855,7 @@ export async function pdfToWord(
             {
               properties: {
                 page: {
-                  margin: { top: 720, right: 540, bottom: 200, left: 540 },
+                  margin: { top: 720, right: 1080, bottom: 500, left: 1080 },
                 },
               },
               children: [

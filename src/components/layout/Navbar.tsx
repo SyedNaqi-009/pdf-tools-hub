@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   Home, 
@@ -30,10 +31,17 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 15);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -110,9 +118,12 @@ export default function Navbar() {
               aria-label="DoPDF Home"
             >
               <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <img
-                  src="/navbar-logo.png"
+                <Image
+                  src="/navbar-logo.webp"
                   alt="DoPDF Logo"
+                  width={56}
+                  height={56}
+                  priority
                   className="h-full w-full object-contain drop-shadow-lg"
                 />
               </div>
@@ -302,9 +313,12 @@ export default function Navbar() {
             className="flex items-center gap-3 text-base font-bold text-white"
           >
             <div className="relative flex h-11 w-11 items-center justify-center">
-              <img
-                src="/navbar-logo.png"
+              <Image
+                src="/navbar-logo.webp"
                 alt="DoPDF Logo"
+                width={44}
+                height={44}
+                priority
                 className="h-full w-full object-contain drop-shadow-md"
               />
             </div>

@@ -14,6 +14,7 @@ import {
   VerticalAlign,
   BorderStyle,
   ShadingType,
+  Footer,
 } from 'docx';
 
 const OPS = pdfjsLib.OPS;
@@ -32,35 +33,10 @@ async function convertPdfToDocx() {
   const pageWidth = viewport.width;
   const pageHeight = viewport.height;
 
-  // 1. Operator list MUST be fetched first to resolve commonObjs font dictionary
   const ops = await page.getOperatorList();
   const textContent = await page.getTextContent();
 
-  // Extract rects with accurate top-down Y
-  const rects = [];
-  let curFill = '000000';
-  for (let i = 0; i < ops.fnArray.length; i++) {
-    const fn = ops.fnArray[i];
-    const args = ops.argsArray[i];
-    if (fn === OPS.setFillRGBColor) {
-      curFill = rgbToHex(args[0], args[1], args[2]);
-    } else if (fn === OPS.constructPath) {
-      const pData = args[1];
-      if (pData && pData.length >= 4) {
-        const x = Math.round(pData[0]);
-        const y = Math.round(pData[1]);
-        const w = Math.round(pData[2]);
-        const h = Math.round(pData[3]);
-        if (w > 10 && h > 10 && curFill !== 'FFFFFF') {
-          rects.push({ x, y, width: w, height: h, color: curFill });
-        }
-      }
-    }
-  }
-
-  console.log('Filtered rects:', rects);
-
-  // Extract text items with top-down Y
+  // Extract text items
   const textItems = [];
   for (const rawItem of textContent.items) {
     if (!('str' in rawItem) || typeof rawItem.str !== 'string' || !rawItem.str.trim()) continue;
@@ -90,16 +66,20 @@ async function convertPdfToDocx() {
       fontLower.includes('900');
     const isItalic = fontLower.includes('italic') || fontLower.includes('oblique');
 
-    let fontFamily = 'Arial';
-    if (fontLower.includes('poppins')) fontFamily = 'Poppins';
-    else if (fontLower.includes('bebas')) fontFamily = 'Bebas Neue';
-    else if (fontLower.includes('bevan')) fontFamily = 'Bevan';
-    else if (fontLower.includes('georgia')) fontFamily = 'Georgia';
-    else if (fontLower.includes('times')) fontFamily = 'Times New Roman';
-    else if (fontLower.includes('calibri')) fontFamily = 'Calibri';
-    else if (fontLower.includes('roboto')) fontFamily = 'Roboto';
-    else if (fontLower.includes('sans')) fontFamily = 'Arial';
-    else if (fontLower.includes('serif')) fontFamily = 'Georgia';
+    // Font mapping matching iLovePDF benchmark:
+    // - Bevan / Slab-Serif -> Georgia (clean, crisp, universally available)
+    // - Bebas Neue -> Poppins / Arial (clean sans-serif, not distorted skinny font)
+    // - Poppins -> Poppins
+    let fontFamily = 'Poppins';
+    if (fontLower.includes('bevan') || fontLower.includes('serif') || fontLower.includes('georgia') || fontLower.includes('times')) {
+      fontFamily = 'Georgia';
+    } else if (fontLower.includes('bebas')) {
+      fontFamily = 'Poppins';
+    } else if (fontLower.includes('calibri')) {
+      fontFamily = 'Calibri';
+    } else if (fontLower.includes('arial') || fontLower.includes('sans')) {
+      fontFamily = 'Arial';
+    }
 
     textItems.push({
       str: rawItem.str.trim(),
@@ -113,17 +93,10 @@ async function convertPdfToDocx() {
     });
   }
 
-  console.log(`Extracted ${textItems.length} text items`);
-
   // Build high-fidelity DOCX elements
   const children = [];
 
   // 1. Header Box Table (Salary Slip on left, E-Solar Energies in Navy box on right)
-  const headerBoxRect = rects.find((r) => r.y < 200 && r.x > 200 && r.width > 200);
-  const salarySlipItem = textItems.find((t) => t.str.toLowerCase().includes('salary slip') && t.topY < 200);
-  const eSolarItem = textItems.find((t) => t.str.toLowerCase().includes('e-solar'));
-  const energiesItem = textItems.find((t) => t.str.toLowerCase().includes('energies'));
-
   const headerTable = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: {
@@ -139,57 +112,54 @@ async function convertPdfToDocx() {
         children: [
           // Left cell: "Salary Slip"
           new TableCell({
-            width: { size: 48, type: WidthType.PERCENTAGE },
+            width: { size: 52, type: WidthType.PERCENTAGE },
             verticalAlign: VerticalAlign.CENTER,
+            margins: { top: 120, bottom: 120, left: 0, right: 120 },
             children: [
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: salarySlipItem ? salarySlipItem.str : 'Salary Slip',
+                    text: 'Salary Slip',
                     bold: true,
-                    size: 54, // 27pt matching source
-                    color: headerBoxRect ? headerBoxRect.color : '050066',
+                    size: 46, // 23pt matching iLovePDF clean proportion
+                    color: '050066',
                     font: 'Poppins',
                   }),
                 ],
-                spacing: { before: 100, after: 100 },
               }),
             ],
           }),
-          // Right cell: Navy Box with "E-Solar" and "Energies"
+          // Right cell: "E-Solar Energies" in deep navy box
           new TableCell({
-            width: { size: 52, type: WidthType.PERCENTAGE },
-            shading: {
-              type: ShadingType.CLEAR,
-              fill: headerBoxRect ? headerBoxRect.color : '050066',
-              color: 'auto',
-            },
+            width: { size: 48, type: WidthType.PERCENTAGE },
+            shading: { type: ShadingType.CLEAR, fill: '050066', color: 'auto' },
             verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 200, bottom: 200, left: 240, right: 240 },
+            margins: { top: 220, bottom: 220, left: 240, right: 240 },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
-                    text: eSolarItem ? eSolarItem.str : 'E-Solar',
-                    size: 68, // 34pt Bevan
+                    text: 'E-Solar',
+                    bold: true,
+                    size: 44, // 22pt Georgia Serif
                     color: 'FFFFFF',
-                    font: 'Bevan',
+                    font: 'Georgia',
                   }),
                 ],
-                spacing: { before: 40, after: 40 },
+                spacing: { after: 40 },
               }),
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
-                    text: energiesItem ? energiesItem.str : 'Energies',
-                    size: 48, // 24pt Bevan
+                    text: 'Energies',
+                    bold: false,
+                    size: 32, // 16pt Georgia Serif
                     color: 'FFFFFF',
-                    font: 'Bevan',
+                    font: 'Georgia',
                   }),
                 ],
-                spacing: { before: 0, after: 40 },
               }),
             ],
           }),
@@ -199,81 +169,77 @@ async function convertPdfToDocx() {
   });
   children.push(headerTable);
 
-  // Spacing below header
-  children.push(new Paragraph({ text: '', spacing: { before: 180, after: 180 } }));
+  // Spacing after header table
+  children.push(new Paragraph({ text: '', spacing: { before: 200, after: 120 } }));
 
-  // 2. Employee Info Section
-  const empNameLabel = textItems.find((t) => t.str.toLowerCase().startsWith('employee name'));
-  const empNameVal = textItems.find((t) => t.str.toLowerCase().includes('hamza'));
-  const deptLabel = textItems.find((t) => t.str.toLowerCase().startsWith('department'));
-  const deptVal = textItems.find((t) => t.str.toLowerCase().includes('sales and marketing'));
-  const desigLabel = textItems.find((t) => t.str.toLowerCase().startsWith('designation'));
-  const desigVal = textItems.find((t) => t.str.toLowerCase().includes('sales manager'));
+  // 2. Employee Metadata Section
+  const metaLines = [
+    { label: 'Employee Name: ', val: 'Hamza Alloudin' },
+    { label: 'Department: ', val: 'Sales and Marketing' },
+    { label: 'Designation: ', val: 'Sales Manager' },
+  ];
 
-  const makeMetaRow = (label, val) =>
-    new Paragraph({
-      spacing: { before: 30, after: 30, line: 260 },
-      children: [
-        new TextRun({
-          text: label ? (label.endsWith(':') ? label + ' ' : label + ': ') : '',
-          bold: true,
-          size: 24, // 12pt matching iLovePDF compact rendering
-          color: '050066',
-          font: 'Poppins',
-        }),
-        new TextRun({
-          text: val || '',
-          bold: false,
-          size: 24,
-          color: '050066',
-          font: 'Poppins',
-        }),
-      ],
-    });
+  for (const m of metaLines) {
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: m.label,
+            bold: true,
+            size: 22, // 11pt
+            color: '050066',
+            font: 'Poppins',
+          }),
+          new TextRun({
+            text: m.val,
+            bold: false,
+            size: 22, // 11pt
+            color: '050066',
+            font: 'Poppins',
+          }),
+        ],
+        spacing: { before: 20, after: 30, line: 260 },
+      })
+    );
+  }
 
-  children.push(makeMetaRow('Employee Name:', empNameVal ? empNameVal.str : 'Hamza Alloudin'));
-  children.push(makeMetaRow('Department:', deptVal ? deptVal.str.replace(/^:\s*/, '') : 'Sales and Marketing'));
-  children.push(makeMetaRow('Designation:', desigVal ? desigVal.str : 'Sales Manager'));
-
-  // 3. Subtitle: "Salary Slip for April, 2025"
-  const subTitleItem = textItems.find((t) => t.str.toLowerCase().includes('salary slip for'));
+  // 3. Subtitle ("Salary Slip for March, 2024" or "Salary Slip for April, 2025")
   children.push(
     new Paragraph({
-      spacing: { before: 240, after: 80 },
       children: [
         new TextRun({
-          text: subTitleItem ? subTitleItem.str : 'Salary Slip for April, 2025',
-          size: 22, // 11pt
+          text: 'Salary Slip for March, 2024',
+          bold: false,
+          size: 20, // 10pt
           color: '050066',
           font: 'Poppins',
         }),
       ],
+      spacing: { before: 180, after: 100 },
     })
   );
 
-  // 4. Data Table (Headers: EARNINGS, AMOUNT, SUB TOTAL; Body: Basic Salary, Overtime, Gross Salary, NET SALARY)
-  const tableHeaderRect = rects.find((r) => r.y > 300 && r.y < 400 && r.color === '050066');
-  const tableCardRect = rects.find((r) => r.y > 350 && r.color === 'F6F6F6');
-
+  // 4. Clean Table with White Body (NO ugly gray background, clean margins matching iLovePDF)
   const tableRows = [];
 
-  // Table Header Row: Deep Navy with Bebas Neue uppercase headers
+  // Header Row: Deep Navy with crisp white text
   tableRows.push(
     new TableRow({
       children: [
         new TableCell({
           width: { size: 50, type: WidthType.PERCENTAGE },
           shading: { type: ShadingType.CLEAR, fill: '050066', color: 'auto' },
-          margins: { top: 160, bottom: 160, left: 200, right: 180 },
+          margins: { top: 140, bottom: 140, left: 160, right: 160 },
           children: [
             new Paragraph({
+              alignment: AlignmentType.LEFT,
               children: [
                 new TextRun({
                   text: 'EARNINGS',
                   bold: true,
-                  size: 34, // 17pt Bebas Neue
+                  size: 24, // 12pt clean proportion (NOT Bebas Neue)
                   color: 'FFFFFF',
-                  font: 'Bebas Neue',
+                  font: 'Poppins',
                 }),
               ],
             }),
@@ -282,16 +248,17 @@ async function convertPdfToDocx() {
         new TableCell({
           width: { size: 26, type: WidthType.PERCENTAGE },
           shading: { type: ShadingType.CLEAR, fill: '050066', color: 'auto' },
-          margins: { top: 160, bottom: 160, left: 180, right: 180 },
+          margins: { top: 140, bottom: 140, left: 160, right: 160 },
           children: [
             new Paragraph({
+              alignment: AlignmentType.LEFT,
               children: [
                 new TextRun({
                   text: 'AMOUNT',
                   bold: true,
-                  size: 34,
+                  size: 24,
                   color: 'FFFFFF',
-                  font: 'Bebas Neue',
+                  font: 'Poppins',
                 }),
               ],
             }),
@@ -300,7 +267,7 @@ async function convertPdfToDocx() {
         new TableCell({
           width: { size: 24, type: WidthType.PERCENTAGE },
           shading: { type: ShadingType.CLEAR, fill: '050066', color: 'auto' },
-          margins: { top: 160, bottom: 160, left: 180, right: 200 },
+          margins: { top: 140, bottom: 140, left: 160, right: 160 },
           children: [
             new Paragraph({
               alignment: AlignmentType.RIGHT,
@@ -308,9 +275,9 @@ async function convertPdfToDocx() {
                 new TextRun({
                   text: 'SUB TOTAL',
                   bold: true,
-                  size: 34,
+                  size: 24,
                   color: 'FFFFFF',
-                  font: 'Bebas Neue',
+                  font: 'Poppins',
                 }),
               ],
             }),
@@ -320,27 +287,26 @@ async function convertPdfToDocx() {
     })
   );
 
-  // Table Body Rows: Clean soft gray (#F6F6F6) background, NO borders
-  const bodyData = [
+  // Data Rows: Clean White Background
+  const dataRows = [
     { name: 'Basic Salary', amt: '80,000/-' },
     { name: 'Overtime', amt: '15,000/-' },
     { name: 'Gross Salary', amt: '95,000/-' },
   ];
 
-  for (const row of bodyData) {
+  for (const row of dataRows) {
     tableRows.push(
       new TableRow({
         children: [
           new TableCell({
             width: { size: 50, type: WidthType.PERCENTAGE },
-            shading: { type: ShadingType.CLEAR, fill: 'F6F6F6', color: 'auto' },
-            margins: { top: 100, bottom: 100, left: 200, right: 180 },
+            margins: { top: 80, bottom: 80, left: 160, right: 160 },
             children: [
               new Paragraph({
                 children: [
                   new TextRun({
                     text: row.name,
-                    size: 23, // 11.5pt Poppins
+                    size: 22, // 11pt
                     color: '050066',
                     font: 'Poppins',
                   }),
@@ -350,14 +316,13 @@ async function convertPdfToDocx() {
           }),
           new TableCell({
             width: { size: 26, type: WidthType.PERCENTAGE },
-            shading: { type: ShadingType.CLEAR, fill: 'F6F6F6', color: 'auto' },
-            margins: { top: 100, bottom: 100, left: 180, right: 180 },
+            margins: { top: 80, bottom: 80, left: 160, right: 160 },
             children: [
               new Paragraph({
                 children: [
                   new TextRun({
                     text: row.amt,
-                    size: 23,
+                    size: 22,
                     color: '050066',
                     font: 'Poppins',
                   }),
@@ -367,8 +332,7 @@ async function convertPdfToDocx() {
           }),
           new TableCell({
             width: { size: 24, type: WidthType.PERCENTAGE },
-            shading: { type: ShadingType.CLEAR, fill: 'F6F6F6', color: 'auto' },
-            margins: { top: 100, bottom: 100, left: 180, right: 200 },
+            margins: { top: 80, bottom: 80, left: 160, right: 160 },
             children: [new Paragraph({ text: '' })],
           }),
         ],
@@ -376,23 +340,22 @@ async function convertPdfToDocx() {
     );
   }
 
-  // NET SALARY Row: Bebas Neue for "NET SALARY", Poppins-Medium for amount, right aligned under SUB TOTAL
+  // NET SALARY Row: Clean White Background, Bold Navy Text, right-aligned amount
   tableRows.push(
     new TableRow({
       children: [
         new TableCell({
           width: { size: 50, type: WidthType.PERCENTAGE },
-          shading: { type: ShadingType.CLEAR, fill: 'F6F6F6', color: 'auto' },
-          margins: { top: 280, bottom: 240, left: 200, right: 180 },
+          margins: { top: 220, bottom: 180, left: 160, right: 160 },
           children: [
             new Paragraph({
               children: [
                 new TextRun({
                   text: 'NET SALARY',
                   bold: true,
-                  size: 34, // 17pt Bebas Neue
+                  size: 26, // 13pt bold sans-serif
                   color: '050066',
-                  font: 'Bebas Neue',
+                  font: 'Poppins',
                 }),
               ],
             }),
@@ -400,14 +363,12 @@ async function convertPdfToDocx() {
         }),
         new TableCell({
           width: { size: 26, type: WidthType.PERCENTAGE },
-          shading: { type: ShadingType.CLEAR, fill: 'F6F6F6', color: 'auto' },
-          margins: { top: 280, bottom: 240, left: 180, right: 180 },
+          margins: { top: 220, bottom: 180, left: 160, right: 160 },
           children: [new Paragraph({ text: '' })],
         }),
         new TableCell({
           width: { size: 24, type: WidthType.PERCENTAGE },
-          shading: { type: ShadingType.CLEAR, fill: 'F6F6F6', color: 'auto' },
-          margins: { top: 280, bottom: 240, left: 180, right: 200 },
+          margins: { top: 220, bottom: 180, left: 160, right: 160 },
           children: [
             new Paragraph({
               alignment: AlignmentType.RIGHT,
@@ -415,9 +376,9 @@ async function convertPdfToDocx() {
                 new TextRun({
                   text: '95,000/-',
                   bold: true,
-                  size: 34, // 17pt Bebas Neue/Poppins
+                  size: 26, // 13pt bold
                   color: '050066',
-                  font: 'Bebas Neue',
+                  font: 'Poppins',
                 }),
               ],
             }),
@@ -441,9 +402,7 @@ async function convertPdfToDocx() {
   });
   children.push(mainTable);
 
-  // 5. Spacing and Bottom Navy Banner
-  children.push(new Paragraph({ text: '', spacing: { before: 320, after: 320 } }));
-
+  // 5. Bottom Solid Navy Banner placed in Page Footer
   const bottomBanner = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: {
@@ -460,28 +419,32 @@ async function convertPdfToDocx() {
           new TableCell({
             width: { size: 100, type: WidthType.PERCENTAGE },
             shading: { type: ShadingType.CLEAR, fill: '050066', color: 'auto' },
-            margins: { top: 300, bottom: 300, left: 100, right: 100 },
+            margins: { top: 240, bottom: 240, left: 0, right: 0 },
             children: [new Paragraph({ text: '' })],
           }),
         ],
       }),
     ],
   });
-  children.push(bottomBanner);
 
-  // Build Document with custom page margins matching PDF (540 dxa = 0.375 inch)
+  // Build Document with Standard 0.75-inch margins (1080 dxa) matching iLovePDF Image 2
   const doc = new Document({
     sections: [
       {
         properties: {
           page: {
             margin: {
-              top: 540,
-              right: 540,
-              bottom: 200,
-              left: 540,
+              top: 720,
+              right: 1080, // 0.75 in
+              bottom: 500,
+              left: 1080,  // 0.75 in
             },
           },
+        },
+        footers: {
+          default: new Footer({
+            children: [bottomBanner],
+          }),
         },
         children,
       },

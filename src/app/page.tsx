@@ -1,6 +1,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight,
   ShieldCheck,
@@ -173,7 +174,7 @@ export default function HomePage() {
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
                     <div className="flex items-center gap-3.5">
                       <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-950 p-1 border border-zinc-800 shadow-inner">
-                        <img src="/navbar-logo.png" alt="DoPDF" className="h-full w-full object-contain drop-shadow-md" />
+                        <Image src="/navbar-logo.webp" alt="DoPDF" width={48} height={48} priority className="h-full w-full object-contain drop-shadow-md" />
                       </div>
                       <div className="flex flex-col">
                         <span className="font-black text-xl sm:text-2xl text-white tracking-tight leading-none">
