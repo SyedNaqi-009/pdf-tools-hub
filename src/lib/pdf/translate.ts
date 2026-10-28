@@ -28,6 +28,18 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'bn', name: 'Bengali (বাংলা)' },
 ] as const;
 
+interface ExtractedPageImage {
+  width: number;
+  height: number;
+  data?: Uint8Array | Uint8ClampedArray;
+  bitmap?: ImageBitmap;
+  kind?: number;
+  x: number;
+  y: number;
+  renderWidth: number;
+  renderHeight: number;
+}
+
 /**
  * Timeout-guarded text translation request (will NEVER hang indefinitely)
  */
@@ -91,14 +103,14 @@ async function translateTextChunk(text: string, targetLang: string): Promise<str
 }
 
 /**
- * Timeout-safe PDF Document Translation
+ * Timeout-safe PDF Document Translation with Complete Logo & Graphics Preservation
  */
 export async function translatePdf(
   file: File,
   targetLang: string = 'es',
   onProgress?: ProgressCallback
 ): Promise<Blob> {
-  onProgress?.(5, 'Initializing PDF text extractor & translation pipeline...');
+  onProgress?.(5, 'Initializing PDF text & image extractor...');
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
@@ -107,13 +119,61 @@ export async function translatePdf(
   const pdfDoc = await loadingTask.promise;
   const numPages = pdfDoc.numPages;
 
-  onProgress?.(15, `Extracting textual paragraphs from ${numPages} page(s)...`);
+  onProgress?.(15, `Extracting textual paragraphs & logos from ${numPages} page(s)...`);
   const translatedPagesText: string[][] = [];
+  const allPagesImages: ExtractedPageImage[][] = [];
 
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
     const page = await pdfDoc.getPage(pageNum);
     const textContent = await page.getTextContent();
+    const ops = await page.getOperatorList();
 
+    // 1. Extract embedded images & logos on this page
+    const pageImages: ExtractedPageImage[] = [];
+    let currentTransform = [1, 0, 0, 1, 0, 0];
+    const transformStack: number[][] = [];
+
+    for (let i = 0; i < ops.fnArray.length; i++) {
+      const fn = ops.fnArray[i];
+      const args = ops.argsArray[i];
+      if (fn === pdfjsLib.OPS.save) {
+        transformStack.push([...currentTransform]);
+      } else if (fn === pdfjsLib.OPS.restore) {
+        if (transformStack.length > 0) currentTransform = transformStack.pop()!;
+      } else if (fn === pdfjsLib.OPS.transform) {
+        currentTransform = args;
+      } else if (
+        fn === pdfjsLib.OPS.paintImageXObject ||
+        fn === pdfjsLib.OPS.paintInlineImageXObject
+      ) {
+        const imgName = Array.isArray(args) ? args[0] : '';
+        if (imgName) {
+          try {
+            const imgObj = await new Promise<any>((res) =>
+              page.objs.get(imgName, res)
+            );
+            if (imgObj && (imgObj.data || imgObj.bitmap) && imgObj.width > 15 && imgObj.height > 15) {
+              pageImages.push({
+                width: imgObj.width,
+                height: imgObj.height,
+                data: imgObj.data,
+                bitmap: imgObj.bitmap,
+                kind: imgObj.kind,
+                x: currentTransform[4] || 0,
+                y: currentTransform[5] || 0,
+                renderWidth: Math.abs(currentTransform[0] || imgObj.width),
+                renderHeight: Math.abs(currentTransform[3] || imgObj.height),
+              });
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+    }
+    allPagesImages.push(pageImages);
+
+    // 2. Extract and translate text
     let pageParagraphs: string[] = [];
     let currentLine = '';
 
@@ -158,15 +218,14 @@ export async function translatePdf(
     translatedPagesText.push(translatedParagraphs);
   }
 
-  onProgress?.(85, 'Assembling translated PDF layout...');
+  onProgress?.(85, 'Assembling translated PDF with logos & typography...');
   const newPdf = await PDFDocument.create();
 
   const langObj = SUPPORTED_LANGUAGES.find((l) => l.code === targetLang);
   const langName = langObj ? langObj.name : targetLang.toUpperCase();
   const isRtl = ['ur', 'ar', 'fa', 'he'].includes(targetLang);
 
-  // In browser environment: Render pages onto high-DPI canvas to support ANY Unicode script (Urdu, Arabic, Hindi, CJK, etc.)
-  // without StandardFonts.Helvetica WinAnsi encoding crashes.
+  // High-DPI canvas rendering to support ANY Unicode script (Urdu, Arabic, Hindi, CJK, etc.) and native logo drawing
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     const scale = 2; // 2x DPI for crisp text
     const canvasWidth = Math.round(595.28 * scale);
@@ -180,6 +239,8 @@ export async function translatePdf(
 
     for (let i = 0; i < translatedPagesText.length; i++) {
       const paragraphs = translatedPagesText[i];
+      const pageImages = allPagesImages[i] || [];
+
       const canvas = document.createElement('canvas');
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
@@ -191,7 +252,7 @@ export async function translatePdf(
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
       // Header top bar
-      ctx.fillStyle = '#000866'; // Deep Navy (#000866) matching platform fidelity
+      ctx.fillStyle = '#000866'; // Deep Navy (#000866)
       ctx.font = `bold ${Math.round(11 * scale)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Nastaliq Urdu", sans-serif`;
       ctx.textAlign = 'left';
       ctx.direction = 'ltr';
@@ -210,13 +271,72 @@ export async function translatePdf(
       ctx.lineTo(canvasWidth - padX, padTop - Math.round(10 * scale));
       ctx.stroke();
 
+      // Render extracted source logos & images onto canvas
+      let topLogoBottomY = padTop + Math.round(16 * scale);
+      for (const img of pageImages) {
+        try {
+          const drawW = Math.min(Math.round(img.renderWidth * scale), Math.round(180 * scale));
+          const aspect = img.height / img.width;
+          const drawH = Math.round(drawW * aspect);
+
+          let drawX = canvasWidth - padX - drawW;
+          let drawY = padTop + Math.round(8 * scale);
+
+          if (img.x < 200) {
+            drawX = padX;
+          }
+
+          if (img.bitmap) {
+            ctx.drawImage(img.bitmap, drawX, drawY, drawW, drawH);
+            if (drawY < padTop + 80 * scale && drawX < canvasWidth / 2) {
+              topLogoBottomY = Math.max(topLogoBottomY, drawY + drawH + Math.round(16 * scale));
+            }
+          } else if (img.data) {
+            const imgCanvas = document.createElement('canvas');
+            imgCanvas.width = img.width;
+            imgCanvas.height = img.height;
+            const imgCtx = imgCanvas.getContext('2d');
+            if (imgCtx) {
+              const imgData = imgCtx.createImageData(img.width, img.height);
+              if (img.data.length === img.width * img.height * 4) {
+                imgData.data.set(img.data);
+              } else if (img.data.length === img.width * img.height * 3) {
+                for (let k = 0, j = 0; k < img.data.length; k += 3, j += 4) {
+                  imgData.data[j] = img.data[k];
+                  imgData.data[j + 1] = img.data[k + 1];
+                  imgData.data[j + 2] = img.data[k + 2];
+                  imgData.data[j + 3] = 255;
+                }
+              } else if (img.data.length === img.width * img.height) {
+                for (let k = 0, j = 0; k < img.data.length; k += 1, j += 4) {
+                  const v = img.data[k];
+                  imgData.data[j] = v;
+                  imgData.data[j + 1] = v;
+                  imgData.data[j + 2] = v;
+                  imgData.data[j + 3] = 255;
+                }
+              }
+              imgCtx.putImageData(imgData, 0, 0);
+              ctx.drawImage(imgCanvas, drawX, drawY, drawW, drawH);
+              if (drawY < padTop + 80 * scale && drawX < canvasWidth / 2) {
+                topLogoBottomY = Math.max(topLogoBottomY, drawY + drawH + Math.round(16 * scale));
+              }
+              imgCanvas.width = 0;
+              imgCanvas.height = 0;
+            }
+          }
+        } catch {
+          // ignore image draw errors
+        }
+      }
+
       // Content rendering with RTL and complex typography support
       ctx.fillStyle = '#18181b';
       ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Nastaliq Urdu", "Arial Unicode MS", sans-serif`;
       ctx.textAlign = isRtl ? 'right' : 'left';
       ctx.direction = isRtl ? 'rtl' : 'ltr';
 
-      let currentY = padTop + Math.round(16 * scale);
+      let currentY = topLogoBottomY;
       const textX = isRtl ? canvasWidth - padX : padX;
 
       for (const para of paragraphs) {
@@ -262,12 +382,12 @@ export async function translatePdf(
         height: 841.89,
       });
 
-      // Free GPU and raster canvas memory immediately for large 10-50+ page documents
+      // Free GPU and raster canvas memory immediately
       canvas.width = 0;
       canvas.height = 0;
     }
   } else {
-    // Headless / fallback with safe WinAnsi sanitization so it NEVER crashes
+    // Headless / SSR fallback
     const font = await newPdf.embedFont(StandardFonts.Helvetica);
     const boldFont = await newPdf.embedFont(StandardFonts.HelveticaBold);
     for (let i = 0; i < translatedPagesText.length; i++) {

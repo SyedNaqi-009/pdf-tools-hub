@@ -638,45 +638,20 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
       ))}
 
       <main className="min-h-screen bg-zinc-50 pb-24">
-        {/* Studio Workspace Header Hero */}
-        <div className="border-b border-zinc-900 bg-zinc-950 text-white py-10 sm:py-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-studio-grid opacity-20 pointer-events-none" />
-          <Container className="relative">
-            <Breadcrumbs
-              items={[
-                { label: 'PDF TOOLS', href: '/tools' },
-                { label: tool.name },
-              ]}
-              className="mb-4 text-zinc-400"
-            />
-
-            <div className="max-w-4xl space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-blue-950/80 px-2.5 py-1 text-[11px] font-mono font-bold text-blue-400 border border-blue-900/60 uppercase">
-                  {tool.categoryLabel}
-                </span>
-                <span className="rounded-md bg-zinc-900 px-2.5 py-1 text-[11px] font-mono text-zinc-400 border border-zinc-800">
-                  .{tool.outputExtension.toUpperCase()} OUTPUT
-                </span>
-                <span className="rounded-md bg-emerald-950/60 px-2.5 py-1 text-[11px] font-mono text-emerald-400 border border-emerald-900/60 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  100% IN-BROWSER MEMORY
-                </span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
-                {tool.actionTitle}
-              </h1>
-
-              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl">
-                {tool.intro}
-              </p>
-            </div>
+        {/* Clean Light Focused Tool Header */}
+        <div className="pt-10 pb-4 text-center">
+          <Container>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-950">
+              {tool.actionTitle}
+            </h1>
+            <p className="mt-2.5 text-sm sm:text-base text-zinc-600 max-w-2xl mx-auto leading-relaxed">
+              {tool.intro}
+            </p>
           </Container>
         </div>
 
         {/* Interactive Workspace Workstation */}
-        <Container className="py-8 sm:py-12">
+        <Container className="py-6 sm:py-8">
           {files.length === 0 ? (
             /* Upload Screen: Full Width Drop Zone */
             <div className="mx-auto max-w-4xl">

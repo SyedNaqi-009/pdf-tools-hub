@@ -90,11 +90,80 @@ export async function pdfToPptx(
       }
     }
 
+    // Extract page logo / images to preserve branding
+    let logoDataUrl: string | null = null;
+    try {
+      const ops = await page.getOperatorList();
+      for (let i = 0; i < ops.fnArray.length; i++) {
+        const fn = ops.fnArray[i];
+        const args = ops.argsArray[i];
+        if (
+          fn === pdfjsLib.OPS.paintImageXObject ||
+          fn === pdfjsLib.OPS.paintInlineImageXObject
+        ) {
+          const imgName = Array.isArray(args) ? args[0] : '';
+          if (imgName) {
+            const imgObj = await new Promise<any>((res) => page.objs.get(imgName, res));
+            if (imgObj && imgObj.data && imgObj.width > 20 && imgObj.height > 20) {
+              const canvas = document.createElement('canvas');
+              canvas.width = imgObj.width;
+              canvas.height = imgObj.height;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                const imgData = ctx.createImageData(imgObj.width, imgObj.height);
+                if (imgObj.data.length === imgObj.width * imgObj.height * 4) {
+                  imgData.data.set(imgObj.data);
+                } else if (imgObj.data.length === imgObj.width * imgObj.height * 3) {
+                  for (let k = 0, j = 0; k < imgObj.data.length; k += 3, j += 4) {
+                    imgData.data[j] = imgObj.data[k];
+                    imgData.data[j + 1] = imgObj.data[k + 1];
+                    imgData.data[j + 2] = imgObj.data[k + 2];
+                    imgData.data[j + 3] = 255;
+                  }
+                } else if (imgObj.data.length === imgObj.width * imgObj.height) {
+                  for (let k = 0, j = 0; k < imgObj.data.length; k += 1, j += 4) {
+                    const v = imgObj.data[k];
+                    imgData.data[j] = v;
+                    imgData.data[j + 1] = v;
+                    imgData.data[j + 2] = v;
+                    imgData.data[j + 3] = 255;
+                  }
+                }
+                ctx.putImageData(imgData, 0, 0);
+                logoDataUrl = canvas.toDataURL('image/png');
+                canvas.width = 0;
+                canvas.height = 0;
+                break; // Embed the primary extracted logo
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // Graceful fallback if image extraction is not supported in environment
+    }
+
+    // Embed extracted logo in the slide header
+    if (logoDataUrl) {
+      try {
+        slide.addImage({
+          data: logoDataUrl,
+          x: 10.8,
+          y: 0.15,
+          w: 1.8,
+          h: 0.8,
+          sizing: { type: 'contain', w: 1.8, h: 0.8 },
+        });
+      } catch {
+        // Continue if slide addImage fails
+      }
+    }
+
     // Slide Title on navy banner
-    slide.addText(title.slice(0, 90), {
+    slide.addText(title.slice(0, 80), {
       x: 0.6,
       y: 0.2,
-      w: 11.5,
+      w: logoDataUrl ? 9.8 : 11.5,
       h: 0.7,
       fontSize: 18,
       bold: true,

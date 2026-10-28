@@ -212,28 +212,32 @@ async function extractPageContent(
         try {
           const imgId = args[0];
           const imgData = await (page as unknown as { objs: { get: (id: string) => unknown } }).objs.get(imgId);
-          if (imgData && typeof imgData === 'object' && 'data' in imgData) {
-            const obj = imgData as { data: Uint8Array; width: number; height: number };
+          if (imgData && typeof imgData === 'object' && ('data' in imgData || 'bitmap' in imgData)) {
+            const obj = imgData as { data?: Uint8Array; bitmap?: ImageBitmap; width: number; height: number };
             if (typeof document !== 'undefined') {
               const canvas = document.createElement('canvas');
               canvas.width = obj.width;
               canvas.height = obj.height;
               const ctx2d = canvas.getContext('2d');
               if (ctx2d) {
-                const imgDataObj = ctx2d.createImageData(obj.width, obj.height);
-                const srcLen = obj.data.length;
-                const pixelCount = obj.width * obj.height;
-                if (srcLen >= pixelCount * 4) {
-                  imgDataObj.data.set(obj.data.slice(0, pixelCount * 4));
-                } else if (srcLen >= pixelCount * 3) {
-                  for (let p = 0; p < pixelCount; p++) {
-                    imgDataObj.data[p * 4] = obj.data[p * 3];
-                    imgDataObj.data[p * 4 + 1] = obj.data[p * 3 + 1];
-                    imgDataObj.data[p * 4 + 2] = obj.data[p * 3 + 2];
-                    imgDataObj.data[p * 4 + 3] = 255;
+                if (obj.bitmap) {
+                  ctx2d.drawImage(obj.bitmap, 0, 0);
+                } else if (obj.data) {
+                  const imgDataObj = ctx2d.createImageData(obj.width, obj.height);
+                  const srcLen = obj.data.length;
+                  const pixelCount = obj.width * obj.height;
+                  if (srcLen >= pixelCount * 4) {
+                    imgDataObj.data.set(obj.data.slice(0, pixelCount * 4));
+                  } else if (srcLen >= pixelCount * 3) {
+                    for (let p = 0; p < pixelCount; p++) {
+                      imgDataObj.data[p * 4] = obj.data[p * 3];
+                      imgDataObj.data[p * 4 + 1] = obj.data[p * 3 + 1];
+                      imgDataObj.data[p * 4 + 2] = obj.data[p * 3 + 2];
+                      imgDataObj.data[p * 4 + 3] = 255;
+                    }
                   }
+                  ctx2d.putImageData(imgDataObj, 0, 0);
                 }
-                ctx2d.putImageData(imgDataObj, 0, 0);
                 const dataUrl = canvas.toDataURL('image/png');
                 const base64 = dataUrl.split(',')[1];
                 const binary = atob(base64);

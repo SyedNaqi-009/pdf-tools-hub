@@ -33,7 +33,8 @@ export interface PdfToExcelOptions {
 async function imageObjToPngBuffer(imgObj: {
   width: number;
   height: number;
-  data: Uint8Array | Uint8ClampedArray;
+  data?: Uint8Array | Uint8ClampedArray;
+  bitmap?: ImageBitmap;
   kind?: number;
 }): Promise<ArrayBuffer | null> {
   if (typeof document === 'undefined') {
@@ -47,29 +48,35 @@ async function imageObjToPngBuffer(imgObj: {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const imgData = ctx.createImageData(imgObj.width, imgObj.height);
-    if (imgObj.data.length === imgObj.width * imgObj.height * 4) {
-      imgData.data.set(imgObj.data);
-    } else if (imgObj.data.length === imgObj.width * imgObj.height * 3) {
-      for (let i = 0, j = 0; i < imgObj.data.length; i += 3, j += 4) {
-        imgData.data[j] = imgObj.data[i];
-        imgData.data[j + 1] = imgObj.data[i + 1];
-        imgData.data[j + 2] = imgObj.data[i + 2];
-        imgData.data[j + 3] = 255;
+    if (imgObj.bitmap) {
+      ctx.drawImage(imgObj.bitmap, 0, 0);
+    } else if (imgObj.data) {
+      const imgData = ctx.createImageData(imgObj.width, imgObj.height);
+      if (imgObj.data.length === imgObj.width * imgObj.height * 4) {
+        imgData.data.set(imgObj.data);
+      } else if (imgObj.data.length === imgObj.width * imgObj.height * 3) {
+        for (let i = 0, j = 0; i < imgObj.data.length; i += 3, j += 4) {
+          imgData.data[j] = imgObj.data[i];
+          imgData.data[j + 1] = imgObj.data[i + 1];
+          imgData.data[j + 2] = imgObj.data[i + 2];
+          imgData.data[j + 3] = 255;
+        }
+      } else if (imgObj.data.length === imgObj.width * imgObj.height) {
+        for (let i = 0, j = 0; i < imgObj.data.length; i += 1, j += 4) {
+          const v = imgObj.data[i];
+          imgData.data[j] = v;
+          imgData.data[j + 1] = v;
+          imgData.data[j + 2] = v;
+          imgData.data[j + 3] = 255;
+        }
+      } else {
+        return null;
       }
-    } else if (imgObj.data.length === imgObj.width * imgObj.height) {
-      for (let i = 0, j = 0; i < imgObj.data.length; i += 1, j += 4) {
-        const v = imgObj.data[i];
-        imgData.data[j] = v;
-        imgData.data[j + 1] = v;
-        imgData.data[j + 2] = v;
-        imgData.data[j + 3] = 255;
-      }
+      ctx.putImageData(imgData, 0, 0);
     } else {
       return null;
     }
 
-    ctx.putImageData(imgData, 0, 0);
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, 'image/png')
     );
@@ -217,7 +224,7 @@ export async function pdfToExcel(
             const imgObj = await new Promise<any>((res) =>
               page.objs.get(imgName, res)
             );
-            if (imgObj && imgObj.data && imgObj.width > 20 && imgObj.height > 20) {
+            if (imgObj && (imgObj.data || imgObj.bitmap) && imgObj.width > 20 && imgObj.height > 20) {
               const pngBuf = await imageObjToPngBuffer(imgObj);
               if (pngBuf) {
                 extractedImages.push({

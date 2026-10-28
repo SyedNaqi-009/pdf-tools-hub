@@ -97,7 +97,31 @@ export async function pptxToPdf(
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(255, 255, 255);
-    doc.text(title.slice(0, 80), margin, 38);
+    doc.text(title.slice(0, 70), margin, 38);
+
+    // Extract & render slide logo/image in top header bar if present
+    try {
+      const relsFileName = slideFileName.replace('ppt/slides/', 'ppt/slides/_rels/') + '.rels';
+      const relsFile = zip.file(relsFileName);
+      if (relsFile) {
+        const relsXml = await relsFile.async('text');
+        const mediaMatches = Array.from(relsXml.matchAll(/Target=["'](?:\.\.\/)?media\/([^"']+)["']/gi));
+        for (const match of mediaMatches) {
+          const mediaName = 'ppt/media/' + match[1];
+          const mediaFile = zip.file(mediaName);
+          if (mediaFile) {
+            const base64Data = await mediaFile.async('base64');
+            const ext = match[1].split('.').pop()?.toUpperCase() || 'PNG';
+            const imgFormat = ext === 'JPG' || ext === 'JPEG' ? 'JPEG' : 'PNG';
+            const dataUrl = `data:image/${imgFormat.toLowerCase()};base64,${base64Data}`;
+            doc.addImage(dataUrl, imgFormat, pageWidth - margin - 100, 10, 42, 40);
+            break; // Render the primary slide logo/brand icon
+          }
+        }
+      }
+    } catch {
+      // Graceful fallback if image decoding is unsupported
+    }
 
     // Slide Number in top right
     doc.setFont('Helvetica', 'normal');
