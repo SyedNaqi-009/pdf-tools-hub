@@ -11,6 +11,8 @@ interface FileDropZoneProps {
   allowMultiple: boolean;
   maxSizeMB?: number;
   disabled?: boolean;
+  buttonLabel?: string;
+  dropNoun?: string;
 }
 
 export function formatFileSize(bytes: number): string {
@@ -29,6 +31,8 @@ export default function FileDropZone({
   allowMultiple,
   maxSizeMB = 100,
   disabled = false,
+  buttonLabel,
+  dropNoun,
 }: FileDropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -105,17 +109,14 @@ export default function FileDropZone({
 
   return (
     <div className="w-full space-y-4">
-      {/* Drop Zone Box */}
+      {/* iLovePDF-style Select Files Workstation */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => !disabled && inputRef.current?.click()}
-        className={`relative flex min-h-[220px] sm:min-h-[250px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all ${
-          isDragging
-            ? 'border-rose-600 bg-rose-50/70 scale-[0.99]'
-            : 'border-zinc-300 bg-zinc-50/70 hover:border-zinc-900 hover:bg-zinc-100/60'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`relative flex min-h-[220px] sm:min-h-[260px] flex-col items-center justify-center p-8 text-center transition-all ${
+          disabled ? 'opacity-50 pointer-events-none' : ''
+        }`}
       >
         <input
           ref={inputRef}
@@ -128,21 +129,32 @@ export default function FileDropZone({
           aria-label="Upload files"
         />
 
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-rose-600 shadow-md border border-zinc-200 mb-4 transition-transform group-hover:scale-105">
-          <UploadCloud className="h-7 w-7" />
-        </div>
+        {/* Dragging Active Overlay */}
+        {isDragging && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl border-3 border-dashed border-[#e5322d] bg-white/95 backdrop-blur-xs shadow-2xl">
+            <span className="text-xl sm:text-2xl font-bold text-[#e5322d]">
+              Drop {dropNoun || 'files'} here
+            </span>
+          </div>
+        )}
 
-        <p className="text-base sm:text-lg font-bold text-zinc-900">
-          Drop files into the Studio, or <span className="text-rose-600 underline font-extrabold">browse</span>
-        </p>
-        
-        <p className="mt-1 text-xs text-zinc-500 max-w-sm">
-          {acceptDescription} · Max {maxSizeMB}MB
+        {/* Big Red iLovePDF-style Select Button */}
+        <button
+          type="button"
+          onClick={() => !disabled && inputRef.current?.click()}
+          disabled={disabled}
+          className="h-16 sm:h-20 px-8 sm:px-14 rounded-2xl bg-[#e5322d] hover:bg-[#d42722] text-white text-xl sm:text-2xl font-bold tracking-tight shadow-xl shadow-red-600/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-3 group"
+        >
+          <span>{buttonLabel || 'Select PDF files'}</span>
+        </button>
+
+        <p className="mt-4 text-sm sm:text-base text-zinc-500 font-medium">
+          or drop {dropNoun || 'PDFs'} here
         </p>
 
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-zinc-900 px-3 py-1 text-[10px] font-mono font-medium text-zinc-300">
-          <Shield className="h-3 w-3 text-emerald-400" />
-          <span>ZERO-UPLOAD SANDBOX · PROCESSED LOCALLY</span>
+        <div className="mt-6 flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <Shield className="h-3.5 w-3.5 text-emerald-500" />
+          <span>{acceptDescription} · 100% In-Browser Memory</span>
         </div>
       </div>
 

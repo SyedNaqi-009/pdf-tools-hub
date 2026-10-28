@@ -38,9 +38,183 @@ interface ToolPageLayoutProps {
   tool: ToolItem;
 }
 
+const TOOL_PRESENTATIONS: Record<
+  string,
+  { title: string; subtitle: string; buttonLabel: string; dropNoun: string }
+> = {
+  'merge-pdf': {
+    title: 'Merge PDF files',
+    subtitle: 'Combine PDFs in the order you want with the easiest PDF merger available.',
+    buttonLabel: 'Select PDF files',
+    dropNoun: 'PDFs',
+  },
+  'split-pdf': {
+    title: 'Split PDF file',
+    subtitle: 'Separate one page or a whole set for easy conversion into independent PDF files.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'compress-pdf': {
+    title: 'Compress PDF file',
+    subtitle: 'Reduce file size while optimizing for maximal PDF quality.',
+    buttonLabel: 'Select PDF files',
+    dropNoun: 'PDFs',
+  },
+  'pdf-to-word': {
+    title: 'PDF to WORD Converter',
+    subtitle: 'Convert your PDF to WORD documents with incredible accuracy.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-to-powerpoint': {
+    title: 'PDF to POWERPOINT',
+    subtitle: 'Turn your PDF into editable PowerPoint PPT and PPTX presentations.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-to-excel': {
+    title: 'PDF to EXCEL Converter',
+    subtitle: 'Pull data straight from PDFs into Excel spreadsheets in a few short seconds.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'word-to-pdf': {
+    title: 'WORD to PDF Converter',
+    subtitle: 'Make DOC and DOCX files easy to read by converting them to PDF.',
+    buttonLabel: 'Select WORD files',
+    dropNoun: 'WORD files',
+  },
+  'powerpoint-to-pdf': {
+    title: 'POWERPOINT to PDF',
+    subtitle: 'Make PPT and PPTX slideshows easy to view by converting them to PDF.',
+    buttonLabel: 'Select POWERPOINT files',
+    dropNoun: 'PowerPoint presentations',
+  },
+  'excel-to-pdf': {
+    title: 'EXCEL to PDF Converter',
+    subtitle: 'Make EXCEL spreadsheets easy to read by converting them to PDF.',
+    buttonLabel: 'Select EXCEL files',
+    dropNoun: 'Excel files',
+  },
+  'pdf-to-jpg': {
+    title: 'PDF to JPG',
+    subtitle: 'Extract all images contained in a PDF or convert each page to a JPG image.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'jpg-to-pdf': {
+    title: 'JPG to PDF',
+    subtitle: 'Convert your images to PDF. Adjust orientation and margins.',
+    buttonLabel: 'Select JPG images',
+    dropNoun: 'images',
+  },
+  'pdf-to-png': {
+    title: 'PDF to PNG',
+    subtitle: 'Extract pages from your PDF to high-quality transparent PNG images.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'png-to-pdf': {
+    title: 'PNG to PDF',
+    subtitle: 'Convert PNG images to PDF documents in seconds.',
+    buttonLabel: 'Select PNG images',
+    dropNoun: 'images',
+  },
+  'rotate-pdf': {
+    title: 'Rotate PDF files',
+    subtitle: 'Rotate your PDF pages horizontally or vertically to the right or left.',
+    buttonLabel: 'Select PDF files',
+    dropNoun: 'PDFs',
+  },
+  'protect-pdf': {
+    title: 'Protect PDF file',
+    subtitle: 'Encrypt your PDF with a password to prevent unauthorized access.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'unlock-pdf': {
+    title: 'Unlock PDF password',
+    subtitle: 'Remove PDF password security, giving you the freedom to use your PDFs.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'sign-pdf': {
+    title: 'Sign PDF',
+    subtitle: 'Sign yourself or request electronic signatures from others.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-watermark': {
+    title: 'Watermark PDF',
+    subtitle: 'Stamp an image or text over your PDF in seconds.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'translate-pdf': {
+    title: 'Translate PDF',
+    subtitle: 'Translate PDF documents accurately into any language in your browser.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'organize-pdf': {
+    title: 'Organize PDF',
+    subtitle: 'Sort pages of your PDF file however you like. Delete or add pages.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'delete-pdf-pages': {
+    title: 'Delete PDF pages',
+    subtitle: 'Remove pages from a PDF document online.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'extract-pdf-pages': {
+    title: 'Extract PDF pages',
+    subtitle: 'Get a new document with only the pages you need.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-metadata-viewer': {
+    title: 'PDF Metadata Viewer',
+    subtitle: 'Inspect hidden document metadata and properties instantly.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-metadata-remover': {
+    title: 'PDF Metadata Remover',
+    subtitle: 'Remove sensitive author, date and software tags from your PDF.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-thumbnail-generator': {
+    title: 'PDF Thumbnail Generator',
+    subtitle: 'Generate high-resolution cover and page preview images.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'pdf-preview': {
+    title: 'PDF Preview',
+    subtitle: 'View and read PDF documents directly in your browser.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+  'fill-pdf-forms': {
+    title: 'Fill PDF Forms',
+    subtitle: 'Fill out interactive PDF forms directly in your browser.',
+    buttonLabel: 'Select PDF file',
+    dropNoun: 'PDF',
+  },
+};
+
 export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
   const relatedTools = getRelatedTools(tool);
   const schemas = getToolStructuredData(tool);
+  const presentation = TOOL_PRESENTATIONS[tool.slug] || {
+    title: tool.name.toLowerCase().includes('pdf') ? `${tool.name} files` : tool.name,
+    subtitle: tool.shortDescription,
+    buttonLabel: tool.allowMultiple ? `Select ${tool.name} files` : `Select ${tool.name} file`,
+    dropNoun: 'files',
+  };
 
   // Core State
   const [files, setFiles] = useState<File[]>([]);
@@ -638,45 +812,38 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
       ))}
 
       <main className="min-h-screen bg-zinc-50 pb-24">
-        {/* Clean Light Focused Tool Header */}
-        <div className="pt-10 pb-4 text-center">
+        {/* Clean Light Focused Tool Header (iLovePDF Style) */}
+        <div className="pt-12 sm:pt-16 pb-2 text-center">
           <Container>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-950">
-              {tool.actionTitle}
+            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-[#33333b]">
+              {presentation.title}
             </h1>
-            <p className="mt-2.5 text-sm sm:text-base text-zinc-600 max-w-2xl mx-auto leading-relaxed">
-              {tool.intro}
+            <p className="mt-3 text-base sm:text-lg lg:text-xl text-[#47474f] max-w-2xl mx-auto leading-relaxed">
+              {presentation.subtitle}
             </p>
           </Container>
         </div>
 
         {/* Interactive Workspace Workstation */}
-        <Container className="py-6 sm:py-8">
+        <Container className="py-4 sm:py-6">
           {files.length === 0 ? (
-            /* Upload Screen: Full Width Drop Zone */
-            <div className="mx-auto max-w-4xl">
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-10 shadow-lg shadow-zinc-950/5 space-y-6">
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-100 text-xs font-mono text-zinc-500">
-                  <span className="font-bold text-zinc-900 uppercase">
-                    STUDIO WORKSPACE // {tool.slug.toUpperCase()}
-                  </span>
-                  <span>MAX 100MB · ZERO SERVER UPLOADS</span>
-                </div>
-
-                <FileDropZone
-                  files={files}
-                  onFilesChange={(newFiles) => {
-                    setFiles(newFiles);
-                    setResultBlob(null);
-                    setResultBlobs([]);
-                    setError(null);
-                  }}
-                  acceptedFileTypes={tool.acceptedFileTypes}
-                  acceptDescription={tool.acceptDescription}
-                  allowMultiple={tool.allowMultiple}
-                  disabled={isProcessing}
-                />
-              </div>
+            /* Upload Screen: Clean Centered iLovePDF Drop Zone */
+            <div className="mx-auto max-w-3xl">
+              <FileDropZone
+                files={files}
+                onFilesChange={(newFiles) => {
+                  setFiles(newFiles);
+                  setResultBlob(null);
+                  setResultBlobs([]);
+                  setError(null);
+                }}
+                acceptedFileTypes={tool.acceptedFileTypes}
+                acceptDescription={tool.acceptDescription}
+                allowMultiple={tool.allowMultiple}
+                disabled={isProcessing}
+                buttonLabel={presentation.buttonLabel}
+                dropNoun={presentation.dropNoun}
+              />
             </div>
           ) : (
             /* Active Studio: iLovePDF Style Studio (Center/Left Light Preview Canvas, Right Side Options Panel) */
