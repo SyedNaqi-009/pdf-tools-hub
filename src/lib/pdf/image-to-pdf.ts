@@ -1,12 +1,20 @@
 import { PDFDocument, PageSizes } from 'pdf-lib';
 import { ProgressCallback } from './merge';
 
+export interface ImageToPdfOptions {
+  orientation?: 'auto' | 'portrait' | 'landscape';
+  pageSize?: 'fit' | 'a4' | 'letter';
+  margin?: 'none' | 'small' | 'standard' | 'large';
+}
+
 /**
- * Convert single or multiple JPG/PNG images into a standardized A4 PDF document.
+ * Convert single or multiple JPG/PNG images into a standardized PDF document
+ * with customizable page orientation, size, and margins.
  */
 export async function imagesToPdf(
   files: File[],
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  options?: ImageToPdfOptions
 ): Promise<Blob> {
   if (files.length === 0) {
     throw new Error('Please select at least one image file.');
@@ -14,6 +22,18 @@ export async function imagesToPdf(
 
   onProgress?.(10, 'Initializing PDF document...');
   const pdfDoc = await PDFDocument.create();
+
+  const orientationOpt = options?.orientation || 'auto';
+  const pageSizeOpt = options?.pageSize || 'a4';
+  const marginOpt = options?.margin || 'small';
+
+  const marginMap = {
+    none: 0,
+    small: 18, // 0.25 in
+    standard: 36, // 0.5 in
+    large: 54, // 0.75 in
+  };
+  const margin = marginMap[marginOpt] ?? 18;
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -32,12 +52,10 @@ export async function imagesToPdf(
         : await pdfDoc.embedJpg(imageBytes);
     } catch {
       try {
-        // Try opposite format if file extension was mismatched
         embeddedImage = isPng
           ? await pdfDoc.embedJpg(imageBytes)
           : await pdfDoc.embedPng(imageBytes);
       } catch {
-        // Browser canvas bridge for WebP, GIF, SVG, BMP
         if (typeof window !== 'undefined' && typeof document !== 'undefined') {
           const imgUrl = URL.createObjectURL(file);
           const img = new Image();
@@ -74,21 +92,32 @@ export async function imagesToPdf(
     const imgWidth = embeddedImage.width;
     const imgHeight = embeddedImage.height;
 
-    // Use A4 dimensions: 595.28 x 841.89 points
-    const [a4Width, a4Height] = PageSizes.A4;
-    const isLandscape = imgWidth > imgHeight;
+    let pageWidth: number;
+    let pageHeight: number;
 
-    const pageWidth = isLandscape ? a4Height : a4Width;
-    const pageHeight = isLandscape ? a4Width : a4Height;
+    if (pageSizeOpt === 'fit') {
+      // Size page exactly to image dimensions + margin
+      pageWidth = imgWidth + margin * 2;
+      pageHeight = imgHeight + margin * 2;
+    } else {
+      const baseDims = pageSizeOpt === 'letter' ? PageSizes.Letter : PageSizes.A4;
+      const isLandscape =
+        orientationOpt === 'landscape'
+          ? true
+          : orientationOpt === 'portrait'
+          ? false
+          : imgWidth > imgHeight;
+
+      pageWidth = isLandscape ? Math.max(baseDims[0], baseDims[1]) : Math.min(baseDims[0], baseDims[1]);
+      pageHeight = isLandscape ? Math.min(baseDims[0], baseDims[1]) : Math.max(baseDims[0], baseDims[1]);
+    }
 
     const page = pdfDoc.addPage([pageWidth, pageHeight]);
 
-    // Calculate scaled dimensions with margins
-    const margin = 36; // 0.5 inch margin
-    const availableWidth = pageWidth - margin * 2;
-    const availableHeight = pageHeight - margin * 2;
+    const availableWidth = Math.max(10, pageWidth - margin * 2);
+    const availableHeight = Math.max(10, pageHeight - margin * 2);
 
-    const scale = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
+    const scale = Math.min(availableWidth / imgWidth, availableHeight / imgHeight, 1.0);
     const scaledWidth = imgWidth * scale;
     const scaledHeight = imgHeight * scale;
 

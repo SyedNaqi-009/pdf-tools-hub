@@ -58,7 +58,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // All 26 Tool Pages
+  // All 27 Tool Pages
   const toolRoutes: MetadataRoute.Sitemap = TOOLS.map((tool) => ({
     url: `${SITE_URL}/tools/${tool.slug}`,
     lastModified: currentDate,
