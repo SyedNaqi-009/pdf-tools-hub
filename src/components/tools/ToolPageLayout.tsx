@@ -6,17 +6,20 @@ import {
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
-  Play,
   RotateCw,
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  Plus,
+  Trash2,
   FileArchive,
   FileSpreadsheet,
   Layers,
   Image as ImageIcon,
   FileText,
   AlertTriangle,
+  ArrowRightCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import Container from '../ui/Container';
@@ -51,7 +54,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
   const [quality, setQuality] = useState<ConversionQuality>('medium');
 
   // Tool Specific Options
-  const [rotationAngle, setRotationAngle] = useState<90 | 180 | 270>(90);
+  const [rotationAngle, setRotationAngle] = useState<0 | 90 | 180 | 270>(90);
   const [pageRange, setPageRange] = useState('1');
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [password, setPassword] = useState('');
@@ -62,12 +65,15 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
   // Advanced Options
   const [sheetMode, setSheetMode] = useState<'single' | 'multiple'>('single');
   const [downloadAsZip, setDownloadAsZip] = useState(true);
-  const [imageOrientation, setImageOrientation] = useState<'auto' | 'portrait' | 'landscape'>('auto');
+  const [imageOrientation, setImageOrientation] = useState<'portrait' | 'landscape'>('portrait');
   const [imagePageSize, setImagePageSize] = useState<'a4' | 'letter' | 'fit'>('a4');
-  const [imageMargin, setImageMargin] = useState<'none' | 'small' | 'standard' | 'large'>('small');
+  const [imageMargin, setImageMargin] = useState<'none' | 'small' | 'large'>('small');
   const [splitMode, setSplitMode] = useState<'all' | 'range' | 'fixed'>('all');
   const [splitFixedCount, setSplitFixedCount] = useState(2);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  // Hidden File Input Ref for adding more files
+  const addFilesInputRef = useRef<HTMLInputElement | null>(null);
 
   // Signature Canvas
   const sigCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -103,6 +109,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
     setFormFieldValues({});
     setHasSignature(false);
     setPreviewImageSrc(null);
+    setDeleteConfirm(false);
   };
 
   const handleCancel = () => {
@@ -139,6 +146,21 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
       }
     }
     return Array.from(new Set(list));
+  };
+
+  // Handle adding more files from red + button
+  const handleAppendFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      if (tool.allowMultiple) {
+        setFiles((prev) => [...prev, ...newFiles]);
+      } else {
+        setFiles(newFiles);
+      }
+      setResultBlob(null);
+      setResultBlobs([]);
+      setError(null);
+    }
   };
 
   // Drawing Canvas Listeners for Signature Tool
@@ -197,7 +219,9 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
     const firstFile = files[0];
     const isPdf = firstFile.type.includes('pdf') || firstFile.name.toLowerCase().endsWith('.pdf');
-    const isImage = firstFile.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(firstFile.name);
+    const isImage =
+      firstFile.type.startsWith('image/') ||
+      /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(firstFile.name);
 
     if (isImage) {
       const url = URL.createObjectURL(firstFile);
@@ -311,7 +335,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
         case 'rotate-pdf': {
           const { rotatePdf } = await import('@/lib/pdf/rotate');
-          const blob = await rotatePdf(files[0], rotationAngle, updateProgress);
+          const blob = await rotatePdf(files[0], rotationAngle === 0 ? 90 : rotationAngle, updateProgress);
           setResultBlob(blob);
           setResultFilename(`rotated-${files[0].name}`);
           break;
@@ -565,6 +589,44 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
     saveAs(resultBlob, resultFilename);
   };
 
+  const getActionLabel = () => {
+    switch (tool.slug) {
+      case 'jpg-to-pdf':
+      case 'png-to-pdf':
+        return 'Convert to PDF';
+      case 'pdf-to-excel':
+        return 'Convert to Excel';
+      case 'pdf-to-word':
+        return 'Convert to Word';
+      case 'word-to-pdf':
+        return 'Convert to PDF';
+      case 'excel-to-pdf':
+        return 'Convert to PDF';
+      case 'powerpoint-to-pdf':
+        return 'Convert to PDF';
+      case 'pdf-to-powerpoint':
+        return 'Convert to PPTX';
+      case 'pdf-to-jpg':
+        return 'Convert to JPG';
+      case 'pdf-to-png':
+        return 'Convert to PNG';
+      case 'compress-pdf':
+        return 'Compress PDF';
+      case 'rotate-pdf':
+        return 'Rotate PDF';
+      case 'split-pdf':
+        return 'Split PDF';
+      case 'merge-pdf':
+        return 'Merge PDF';
+      case 'delete-pdf-pages':
+        return deleteConfirm ? 'Confirm & Delete' : 'Delete Pages';
+      case 'extract-pdf-pages':
+        return 'Extract Pages';
+      default:
+        return `Execute ${tool.name}`;
+    }
+  };
+
   return (
     <>
       {schemas.map((schema, index) => (
@@ -577,7 +639,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
 
       <main className="min-h-screen bg-zinc-50 pb-24">
         {/* Studio Workspace Header Hero */}
-        <div className="border-b border-zinc-900 bg-zinc-950 text-white py-10 sm:py-14 relative overflow-hidden">
+        <div className="border-b border-zinc-900 bg-zinc-950 text-white py-10 sm:py-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-studio-grid opacity-20 pointer-events-none" />
           <Container className="relative">
             <Breadcrumbs
@@ -585,10 +647,10 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                 { label: 'PDF TOOLS', href: '/tools' },
                 { label: tool.name },
               ]}
-              className="mb-6 text-zinc-400"
+              className="mb-4 text-zinc-400"
             />
 
-            <div className="max-w-4xl space-y-4">
+            <div className="max-w-4xl space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-blue-950/80 px-2.5 py-1 text-[11px] font-mono font-bold text-blue-400 border border-blue-900/60 uppercase">
                   {tool.categoryLabel}
@@ -614,7 +676,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
         </div>
 
         {/* Interactive Workspace Workstation */}
-        <Container className="py-10 sm:py-14">
+        <Container className="py-8 sm:py-12">
           {files.length === 0 ? (
             /* Upload Screen: Full Width Drop Zone */
             <div className="mx-auto max-w-4xl">
@@ -642,575 +704,632 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
               </div>
             </div>
           ) : (
-            /* Active Studio: 2-Column Responsive Desktop Grid (Sticky Settings Left, Preview Right) */
+            /* Active Studio: iLovePDF Style Studio (Center/Left Light Preview Canvas, Right Side Options Panel) */
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
-              {/* LEFT COLUMN: Controls & Settings (lg:col-span-5) */}
-              <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-6">
-                <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-md shadow-zinc-950/5 space-y-5">
-                  
-                  {/* Workspace Status Bar */}
-                  <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                    <span className="text-xs font-bold text-zinc-900 uppercase font-mono tracking-wider flex items-center gap-2">
-                      <Layers className="h-4 w-4 text-blue-600" />
-                      Parameters & Options
+              {/* LEFT / CENTER: Clean Light Document Preview Stage (lg:col-span-8) */}
+              <div className="lg:col-span-8 bg-[#f4f5f7] border border-zinc-200/90 rounded-3xl p-6 sm:p-10 relative min-h-[460px] sm:min-h-[520px] flex flex-col items-center justify-center shadow-xs overflow-hidden">
+                
+                {/* Hidden File Input for Add Button */}
+                <input
+                  ref={addFilesInputRef}
+                  type="file"
+                  multiple={tool.allowMultiple}
+                  accept={Array.isArray(tool.acceptedFileTypes) ? tool.acceptedFileTypes.join(',') : tool.acceptedFileTypes}
+                  onChange={handleAppendFiles}
+                  className="hidden"
+                />
+
+                {/* Floating Add More Files (+) Button with Count Badge */}
+                <button
+                  type="button"
+                  onClick={() => addFilesInputRef.current?.click()}
+                  title="Add more files"
+                  className="absolute top-5 right-5 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-[#e5322d] text-white shadow-xl hover:bg-[#d42722] hover:scale-105 transition-all cursor-pointer group"
+                >
+                  <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform" />
+                  <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-black text-white border-2 border-white shadow">
+                    {files.length}
+                  </span>
+                </button>
+
+                {/* Reset / Replace Link */}
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="absolute top-5 left-5 z-20 text-xs font-mono font-bold text-zinc-500 hover:text-rose-600 transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Clear All</span>
+                </button>
+
+                {/* The Paper Sheet Card (Realistic Floating White Sheet Preview) */}
+                <div
+                  className={`bg-white rounded-lg shadow-xl border border-zinc-200/80 transition-all duration-300 relative flex items-center justify-center overflow-hidden ${
+                    // Dynamic Aspect Ratio based on orientation for image tools
+                    tool.slug === 'jpg-to-pdf' || tool.slug === 'png-to-pdf'
+                      ? imageOrientation === 'landscape'
+                        ? 'w-[320px] sm:w-[380px] aspect-[1.414/1]'
+                        : 'w-[230px] sm:w-[260px] aspect-[1/1.414]'
+                      : 'w-[240px] sm:w-[270px] aspect-[1/1.414]'
+                  } ${
+                    // Dynamic padding based on selected margins
+                    tool.slug === 'jpg-to-pdf' || tool.slug === 'png-to-pdf'
+                      ? imageMargin === 'none'
+                        ? 'p-0'
+                        : imageMargin === 'large'
+                        ? 'p-6 sm:p-7'
+                        : 'p-3 sm:p-4'
+                      : 'p-2'
+                  }`}
+                  style={{
+                    // Live CSS Rotation for Rotate PDF Tool
+                    transform:
+                      tool.slug === 'rotate-pdf'
+                        ? `rotate(${rotationAngle}deg)`
+                        : undefined,
+                    transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease, height 0.3s ease, padding 0.25s ease',
+                  }}
+                >
+                  {previewImageSrc ? (
+                    <img
+                      src={previewImageSrc}
+                      alt="Uploaded preview"
+                      className={`max-h-full max-w-full object-contain ${
+                        imageMargin === 'none' ? 'w-full h-full object-cover' : 'rounded shadow-2xs'
+                      }`}
+                    />
+                  ) : (
+                    <canvas
+                      ref={previewCanvasRef}
+                      className="max-h-full max-w-full object-contain shadow-xs rounded"
+                    />
+                  )}
+                </div>
+
+                {/* Filename & Document Details Below Sheet */}
+                <div className="mt-4 text-center">
+                  <p className="text-xs font-semibold text-zinc-700 truncate max-w-[280px]">
+                    {files[0].name}
+                  </p>
+                  <p className="text-[11px] font-mono text-zinc-500 mt-0.5">
+                    {(files[0].size / 1024 / 1024).toFixed(2)} MB · {files.length} file(s)
+                  </p>
+                </div>
+
+                {/* PDF Multi-Page Navigation Controls */}
+                {previewTotalPages > 1 && (
+                  <div className="mt-3 flex items-center gap-2 bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-full border border-zinc-200/80 shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => changePreviewPage(previewPage - 1)}
+                      disabled={previewPage <= 1}
+                      className="p-1 rounded-full text-zinc-700 disabled:opacity-30 hover:bg-zinc-100 cursor-pointer"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <span className="text-xs font-mono font-bold text-zinc-700 px-1">
+                      {previewPage} of {previewTotalPages}
                     </span>
                     <button
                       type="button"
-                      onClick={handleReset}
-                      className="text-xs font-mono font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
+                      onClick={() => changePreviewPage(previewPage + 1)}
+                      disabled={previewPage >= previewTotalPages}
+                      className="p-1 rounded-full text-zinc-700 disabled:opacity-30 hover:bg-zinc-100 cursor-pointer"
                     >
-                      Clear File
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
+                )}
+              </div>
 
-                  {/* Quality Presets */}
-                  {['compress-pdf', 'pdf-to-word', 'word-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-jpg', 'pdf-to-png', 'jpg-to-pdf', 'png-to-pdf', 'pdf-to-powerpoint', 'powerpoint-to-pdf'].includes(tool.slug) && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <span className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Output Quality & Compression:
-                      </span>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(['low', 'medium', 'high'] as ConversionQuality[]).map((q) => {
-                          const preset = QUALITY_PRESETS[q];
-                          const isSelected = quality === q;
-                          return (
-                            <button
-                              key={q}
-                              type="button"
-                              onClick={() => setQuality(q)}
-                              className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
-                                isSelected
-                                  ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
-                                  : 'border-zinc-200 bg-white hover:border-zinc-300'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[11px] font-black text-zinc-900 uppercase">
-                                  {q}
-                                </span>
-                              </div>
-                              <span className="text-[10px] text-zinc-500 block truncate">
-                                {preset.badge}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+              {/* RIGHT SIDEBAR: Parameters, Options & Action CTA (lg:col-span-4) */}
+              <div className="lg:col-span-4 w-full bg-white border border-zinc-200 rounded-3xl shadow-sm p-6 sm:p-7 space-y-6 lg:sticky lg:top-6">
+                
+                {/* Options Panel Title */}
+                <div className="border-b border-zinc-100 pb-3">
+                  <h2 className="text-xl font-black text-zinc-900 text-center tracking-tight">
+                    {tool.name} options
+                  </h2>
+                </div>
 
-                  {/* PDF to Excel: Worksheet Structure Option */}
-                  {tool.slug === 'pdf-to-excel' && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Worksheet Arrangement:
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSheetMode('single')}
-                          className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
-                            sheetMode === 'single'
-                              ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600'
-                              : 'border-zinc-200 bg-white hover:border-zinc-300'
-                          }`}
-                        >
-                          <span className="text-xs font-bold text-zinc-900 block">Single Sheet</span>
-                          <span className="text-[11px] text-zinc-500">All pages consolidated</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSheetMode('multiple')}
-                          className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
-                            sheetMode === 'multiple'
-                              ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600'
-                              : 'border-zinc-200 bg-white hover:border-zinc-300'
-                          }`}
-                        >
-                          <span className="text-xs font-bold text-zinc-900 block">Multiple Sheets</span>
-                          <span className="text-[11px] text-zinc-500">1 sheet per PDF page</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* PDF to JPG / PDF to PNG: ZIP Option */}
-                  {(tool.slug === 'pdf-to-jpg' || tool.slug === 'pdf-to-png') && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-zinc-800">
-                        <input
-                          type="checkbox"
-                          checked={downloadAsZip}
-                          onChange={(e) => setDownloadAsZip(e.target.checked)}
-                          className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span>Download pages bundled in a single ZIP archive</span>
-                      </label>
-                      <p className="text-[11px] text-zinc-500 font-mono">
-                        Provides a single-click download for all converted page images.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* JPG to PDF / PNG to PDF Options */}
-                  {(tool.slug === 'jpg-to-pdf' || tool.slug === 'png-to-pdf') && (
-                    <div className="space-y-4 pb-4 border-b border-zinc-100">
-                      <div>
-                        <label className="text-xs font-bold text-zinc-700 uppercase font-mono block mb-1.5">
-                          Page Orientation:
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {(['auto', 'portrait', 'landscape'] as const).map((ori) => (
-                            <button
-                              key={ori}
-                              type="button"
-                              onClick={() => setImageOrientation(ori)}
-                              className={`py-2 text-xs font-bold font-mono rounded-lg border capitalize cursor-pointer ${
-                                imageOrientation === ori
-                                  ? 'bg-zinc-950 text-white border-zinc-950'
-                                  : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
-                              }`}
-                            >
-                              {ori}
-                            </button>
-                          ))}
+                {/* Option 1: JPG/PNG to PDF - Page orientation */}
+                {(tool.slug === 'jpg-to-pdf' || tool.slug === 'png-to-pdf') && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Page orientation
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Portrait Card */}
+                      <button
+                        type="button"
+                        onClick={() => setImageOrientation('portrait')}
+                        className={`rounded-xl border p-4 text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                          imageOrientation === 'portrait'
+                            ? 'border-zinc-800 bg-zinc-50 shadow-xs ring-1 ring-zinc-800 text-zinc-900 font-bold'
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <div className="w-5 h-7 border-2 border-current rounded-[3px] mb-2 flex items-center justify-center">
+                          <div className="w-2.5 h-3.5 border border-dashed border-current/40" />
                         </div>
-                      </div>
+                        <span className="text-xs">Portrait</span>
+                      </button>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs font-bold text-zinc-700 uppercase font-mono block mb-1">
-                            Paper Size:
-                          </label>
-                          <select
-                            value={imagePageSize}
-                            onChange={(e) => setImagePageSize(e.target.value as any)}
-                            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-900"
-                          >
-                            <option value="a4">A4 Standard</option>
-                            <option value="letter">US Letter</option>
-                            <option value="fit">Fit to Image Size</option>
-                          </select>
+                      {/* Landscape Card */}
+                      <button
+                        type="button"
+                        onClick={() => setImageOrientation('landscape')}
+                        className={`rounded-xl border p-4 text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                          imageOrientation === 'landscape'
+                            ? 'border-zinc-800 bg-zinc-50 shadow-xs ring-1 ring-zinc-800 text-zinc-900 font-bold'
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <div className="w-7 h-5 border-2 border-current rounded-[3px] mb-2 flex items-center justify-center">
+                          <div className="w-3.5 h-2.5 border border-dashed border-current/40" />
                         </div>
-                        <div>
-                          <label className="text-xs font-bold text-zinc-700 uppercase font-mono block mb-1">
-                            Margins:
-                          </label>
-                          <select
-                            value={imageMargin}
-                            onChange={(e) => setImageMargin(e.target.value as any)}
-                            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-900"
-                          >
-                            <option value="none">No Margin (0)</option>
-                            <option value="small">Small (0.25")</option>
-                            <option value="standard">Standard (0.5")</option>
-                            <option value="large">Large (0.75")</option>
-                          </select>
-                        </div>
-                      </div>
+                        <span className="text-xs">Landscape</span>
+                      </button>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Split PDF Mode Options */}
-                  {tool.slug === 'split-pdf' && (
-                    <div className="space-y-3 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Split Mode:
-                      </label>
-                      <div className="grid grid-cols-1 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSplitMode('all')}
-                          className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
-                            splitMode === 'all'
-                              ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
-                              : 'border-zinc-200 bg-white hover:border-zinc-300'
-                          }`}
-                        >
-                          <span className="text-xs font-bold text-zinc-900 block">Extract All Pages</span>
-                          <span className="text-[11px] text-zinc-500">Every single page saved into individual PDFs</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSplitMode('range')}
-                          className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
-                            splitMode === 'range'
-                              ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
-                              : 'border-zinc-200 bg-white hover:border-zinc-300'
-                          }`}
-                        >
-                          <span className="text-xs font-bold text-zinc-900 block">Custom Page Ranges</span>
-                          <span className="text-[11px] text-zinc-500">Split by page expressions (e.g. 1-3, 5, 8-10)</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSplitMode('fixed')}
-                          className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
-                            splitMode === 'fixed'
-                              ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
-                              : 'border-zinc-200 bg-white hover:border-zinc-300'
-                          }`}
-                        >
-                          <span className="text-xs font-bold text-zinc-900 block">Fixed Intervals</span>
-                          <span className="text-[11px] text-zinc-500">Split into chunks of N pages</span>
-                        </button>
-                      </div>
+                {/* Option 2: JPG/PNG to PDF - Page size */}
+                {(tool.slug === 'jpg-to-pdf' || tool.slug === 'png-to-pdf') && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Page size
+                    </label>
+                    <select
+                      value={imagePageSize}
+                      onChange={(e) => setImagePageSize(e.target.value as any)}
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-zinc-900 focus:border-zinc-900 focus:outline-hidden"
+                    >
+                      <option value="a4">A4 (297x210 mm)</option>
+                      <option value="letter">US Letter (215x279 mm)</option>
+                      <option value="fit">Fit (same page size as image)</option>
+                    </select>
+                  </div>
+                )}
 
-                      {splitMode === 'range' && (
-                        <div className="pt-2">
-                          <label className="text-xs font-bold text-zinc-700 uppercase font-mono block mb-1">
-                            Page Ranges (e.g. 1-2, 3-5):
-                          </label>
-                          <input
-                            type="text"
-                            value={pageRange}
-                            onChange={(e) => setPageRange(e.target.value)}
-                            className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
-                            placeholder="1-2, 3-5"
-                          />
+                {/* Option 3: JPG/PNG to PDF - Margin */}
+                {(tool.slug === 'jpg-to-pdf' || tool.slug === 'png-to-pdf') && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Margin
+                    </label>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      {/* No Margin */}
+                      <button
+                        type="button"
+                        onClick={() => setImageMargin('none')}
+                        className={`rounded-xl border p-3 text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                          imageMargin === 'none'
+                            ? 'border-zinc-800 bg-zinc-50 shadow-xs ring-1 ring-zinc-800 text-zinc-900 font-bold'
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <div className="w-7 h-7 border-2 border-current rounded-[3px] mb-1.5 bg-current/10 flex items-center justify-center">
+                          <ImageIcon className="w-4 h-4" />
                         </div>
-                      )}
+                        <span className="text-[11px]">No margin</span>
+                      </button>
 
-                      {splitMode === 'fixed' && (
-                        <div className="pt-2">
-                          <label className="text-xs font-bold text-zinc-700 uppercase font-mono block mb-1">
-                            Pages per Document:
-                          </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="50"
-                            value={splitFixedCount}
-                            onChange={(e) => setSplitFixedCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                            className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Rotate PDF Options */}
-                  {tool.slug === 'rotate-pdf' && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <span className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Rotation Direction:
-                      </span>
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setRotationAngle(90)}
-                          className={`p-2.5 rounded-xl text-center text-xs font-bold font-mono border transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                            rotationAngle === 90
-                              ? 'bg-zinc-950 text-white border-zinc-950 shadow-sm'
-                              : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
-                          }`}
-                        >
-                          <RotateCw className="h-4 w-4" />
-                          <span>90° CW</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRotationAngle(270)}
-                          className={`p-2.5 rounded-xl text-center text-xs font-bold font-mono border transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                            rotationAngle === 270
-                              ? 'bg-zinc-950 text-white border-zinc-950 shadow-sm'
-                              : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
-                          }`}
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                          <span>90° CCW</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRotationAngle(180)}
-                          className={`p-2.5 rounded-xl text-center text-xs font-bold font-mono border transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                            rotationAngle === 180
-                              ? 'bg-zinc-950 text-white border-zinc-950 shadow-sm'
-                              : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
-                          }`}
-                        >
-                          <RotateCw className="h-4 w-4 transform rotate-90" />
-                          <span>180° Flip</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Page Range Inputs (Extract, Delete, Thumbnails) */}
-                  {(tool.slug === 'extract-pdf-pages' ||
-                    tool.slug === 'delete-pdf-pages' ||
-                    tool.slug === 'pdf-thumbnail-generator') && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        {tool.slug === 'delete-pdf-pages'
-                          ? 'Page numbers to delete (e.g. 1, 3, 5-7):'
-                          : tool.slug === 'pdf-thumbnail-generator'
-                          ? 'Page number for thumbnail render:'
-                          : 'Page numbers to extract (e.g. 1, 3, 5-8):'}
-                      </label>
-                      <input
-                        type="text"
-                        value={pageRange}
-                        onChange={(e) => {
-                          setPageRange(e.target.value);
-                          setDeleteConfirm(false);
-                        }}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-xs font-mono text-zinc-900 focus:border-zinc-900 focus:outline-hidden"
-                        placeholder="e.g. 1, 3, 5-8"
-                      />
-
-                      {deleteConfirm && tool.slug === 'delete-pdf-pages' && (
-                        <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 flex items-start gap-2">
-                          <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                          <div>
-                            <p className="font-bold">Confirm Deletion</p>
-                            <p className="mt-0.5 text-[11px] text-amber-800">
-                              You are about to remove multiple pages. Click "Confirm & Delete" to proceed.
-                            </p>
+                      {/* Small Margin */}
+                      <button
+                        type="button"
+                        onClick={() => setImageMargin('small')}
+                        className={`rounded-xl border p-3 text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                          imageMargin === 'small'
+                            ? 'border-zinc-800 bg-zinc-50 shadow-xs ring-1 ring-zinc-800 text-zinc-900 font-bold'
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <div className="w-7 h-7 border border-dashed border-current/60 rounded-[3px] p-0.5 mb-1.5 flex items-center justify-center">
+                          <div className="w-5 h-5 border border-current bg-current/10 rounded-[2px] flex items-center justify-center">
+                            <ImageIcon className="w-3 h-3" />
                           </div>
                         </div>
-                      )}
-                    </div>
-                  )}
+                        <span className="text-[11px]">Small</span>
+                      </button>
 
-                  {/* Watermark Stamp */}
-                  {tool.slug === 'pdf-watermark' && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Watermark Stamp Text:
-                      </label>
+                      {/* Big Margin */}
+                      <button
+                        type="button"
+                        onClick={() => setImageMargin('large')}
+                        className={`rounded-xl border p-3 text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                          imageMargin === 'large'
+                            ? 'border-zinc-800 bg-zinc-50 shadow-xs ring-1 ring-zinc-800 text-zinc-900 font-bold'
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <div className="w-7 h-7 border border-dashed border-current/60 rounded-[3px] p-1.5 mb-1.5 flex items-center justify-center">
+                          <div className="w-3.5 h-3.5 border border-current bg-current/10 rounded-[2px] flex items-center justify-center">
+                            <ImageIcon className="w-2.5 h-2.5" />
+                          </div>
+                        </div>
+                        <span className="text-[11px]">Big</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rotate PDF Options */}
+                {tool.slug === 'rotate-pdf' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Rotation direction
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setRotationAngle(90)}
+                        className={`p-3 rounded-xl text-center text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1.5 ${
+                          rotationAngle === 90
+                            ? 'bg-zinc-950 text-white border-zinc-950 shadow-sm'
+                            : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300'
+                        }`}
+                      >
+                        <RotateCw className="h-5 w-5" />
+                        <span>90° Right</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRotationAngle(270)}
+                        className={`p-3 rounded-xl text-center text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1.5 ${
+                          rotationAngle === 270
+                            ? 'bg-zinc-950 text-white border-zinc-950 shadow-sm'
+                            : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300'
+                        }`}
+                      >
+                        <RotateCcw className="h-5 w-5" />
+                        <span>90° Left</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRotationAngle(180)}
+                        className={`p-3 rounded-xl text-center text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1.5 ${
+                          rotationAngle === 180
+                            ? 'bg-zinc-950 text-white border-zinc-950 shadow-sm'
+                            : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300'
+                        }`}
+                      >
+                        <RotateCw className="h-5 w-5 transform rotate-90" />
+                        <span>180° Flip</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* PDF to Excel - Worksheet Arrangement */}
+                {tool.slug === 'pdf-to-excel' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Worksheet arrangement
+                    </label>
+                    <div className="grid grid-cols-1 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSheetMode('single')}
+                        className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                          sheetMode === 'single'
+                            ? 'border-emerald-600 bg-emerald-50/70 ring-1 ring-emerald-600'
+                            : 'border-zinc-200 bg-white hover:border-zinc-300'
+                        }`}
+                      >
+                        <span className="text-xs font-bold text-zinc-900 block">Single Sheet (Consolidated)</span>
+                        <span className="text-[11px] text-zinc-500">All PDF pages merged into one master sheet</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSheetMode('multiple')}
+                        className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                          sheetMode === 'multiple'
+                            ? 'border-emerald-600 bg-emerald-50/70 ring-1 ring-emerald-600'
+                            : 'border-zinc-200 bg-white hover:border-zinc-300'
+                        }`}
+                      >
+                        <span className="text-xs font-bold text-zinc-900 block">Multiple Sheets</span>
+                        <span className="text-[11px] text-zinc-500">One dedicated worksheet per PDF page</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* PDF to JPG / PNG - ZIP Checkbox */}
+                {(tool.slug === 'pdf-to-jpg' || tool.slug === 'pdf-to-png') && (
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3.5 space-y-1">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-900">
                       <input
-                        type="text"
-                        value={watermarkText}
-                        onChange={(e) => setWatermarkText(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-xs font-mono text-zinc-900"
-                        placeholder="e.g. CONFIDENTIAL or DRAFT"
+                        type="checkbox"
+                        checked={downloadAsZip}
+                        onChange={(e) => setDownloadAsZip(e.target.checked)}
+                        className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
                       />
-                    </div>
-                  )}
+                      <span>Download pages as ZIP archive</span>
+                    </label>
+                    <p className="text-[11px] text-zinc-500 pl-6">
+                      Extracts all high-resolution page images into a single package.
+                    </p>
+                  </div>
+                )}
 
-                  {/* Password Protection */}
-                  {(tool.slug === 'protect-pdf' || tool.slug === 'unlock-pdf') && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        {tool.slug === 'protect-pdf' ? 'Set Document Password:' : 'Current Password:'}
-                      </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-xs font-mono text-zinc-900"
-                        placeholder="Enter password..."
-                      />
+                {/* Split PDF Mode Options */}
+                {tool.slug === 'split-pdf' && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Split mode
+                    </label>
+                    <div className="grid grid-cols-1 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSplitMode('all')}
+                        className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
+                          splitMode === 'all'
+                            ? 'border-blue-600 bg-blue-50/70 ring-1 ring-blue-600'
+                            : 'border-zinc-200 bg-white hover:border-zinc-300'
+                        }`}
+                      >
+                        <span className="text-xs font-bold text-zinc-900 block">Extract All Pages</span>
+                        <span className="text-[11px] text-zinc-500">Every single page saved into individual PDFs</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSplitMode('range')}
+                        className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
+                          splitMode === 'range'
+                            ? 'border-blue-600 bg-blue-50/70 ring-1 ring-blue-600'
+                            : 'border-zinc-200 bg-white hover:border-zinc-300'
+                        }`}
+                      >
+                        <span className="text-xs font-bold text-zinc-900 block">Custom Page Ranges</span>
+                        <span className="text-[11px] text-zinc-500">e.g. 1-3, 5, 8-10</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSplitMode('fixed')}
+                        className={`rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
+                          splitMode === 'fixed'
+                            ? 'border-blue-600 bg-blue-50/70 ring-1 ring-blue-600'
+                            : 'border-zinc-200 bg-white hover:border-zinc-300'
+                        }`}
+                      >
+                        <span className="text-xs font-bold text-zinc-900 block">Fixed Chunks</span>
+                        <span className="text-[11px] text-zinc-500">Split into chunks of N pages</span>
+                      </button>
                     </div>
-                  )}
 
-                  {/* Page Order Reorganize */}
-                  {tool.slug === 'organize-pdf' && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Target Page Sequence (e.g. 3, 1, 2):
-                      </label>
-                      <input
-                        type="text"
-                        value={pageOrder}
-                        onChange={(e) => setPageOrder(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-xs font-mono text-zinc-900"
-                        placeholder="3, 1, 2"
-                      />
-                    </div>
-                  )}
-
-                  {/* Signature Pad */}
-                  {tool.slug === 'sign-pdf' && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-zinc-700 uppercase font-mono">
-                          Draw Signature Canvas:
-                        </label>
-                        <button
-                          type="button"
-                          onClick={clearSignature}
-                          className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
-                        >
-                          Clear
-                        </button>
-                      </div>
-                      <div className="rounded-xl border border-zinc-300 bg-white p-2">
-                        <canvas
-                          ref={sigCanvasRef}
-                          width={400}
-                          height={120}
-                          className="w-full h-28 bg-zinc-50 rounded-lg cursor-crosshair touch-none"
-                          onMouseDown={(e) => {
-                            setIsDrawing(true);
-                            setHasSignature(true);
-                            const ctx = sigCanvasRef.current?.getContext('2d');
-                            const rect = sigCanvasRef.current?.getBoundingClientRect();
-                            if (ctx && rect) {
-                              ctx.beginPath();
-                              ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-                            }
-                          }}
-                          onMouseMove={(e) => {
-                            if (!isDrawing) return;
-                            const ctx = sigCanvasRef.current?.getContext('2d');
-                            const rect = sigCanvasRef.current?.getBoundingClientRect();
-                            if (ctx && rect) {
-                              ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-                              ctx.stroke();
-                            }
-                          }}
-                          onMouseUp={() => setIsDrawing(false)}
-                          onMouseLeave={() => setIsDrawing(false)}
-                          onTouchStart={(e) => {
-                            setIsDrawing(true);
-                            setHasSignature(true);
-                            const ctx = sigCanvasRef.current?.getContext('2d');
-                            const rect = sigCanvasRef.current?.getBoundingClientRect();
-                            if (ctx && rect && e.touches[0]) {
-                              ctx.beginPath();
-                              ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                            }
-                          }}
-                          onTouchMove={(e) => {
-                            if (!isDrawing) return;
-                            const ctx = sigCanvasRef.current?.getContext('2d');
-                            const rect = sigCanvasRef.current?.getBoundingClientRect();
-                            if (ctx && rect && e.touches[0]) {
-                              ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                              ctx.stroke();
-                            }
-                          }}
-                          onTouchEnd={() => setIsDrawing(false)}
+                    {splitMode === 'range' && (
+                      <div className="pt-1">
+                        <input
+                          type="text"
+                          value={pageRange}
+                          onChange={(e) => setPageRange(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
+                          placeholder="e.g. 1-2, 3-5"
                         />
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Form Fields */}
-                  {tool.slug === 'fill-pdf-forms' && (
-                    <div className="space-y-3 pb-4 border-b border-zinc-100 max-h-60 overflow-y-auto">
-                      <p className="text-xs text-zinc-600 font-mono">
-                        {detectedFields.length > 0
-                          ? `Found ${detectedFields.length} interactive fields:`
-                          : 'No interactive form fields detected.'}
-                      </p>
-                      {detectedFields.map((field) => (
-                        <div key={field} className="space-y-1">
-                          <label className="text-[11px] font-semibold text-zinc-700 block truncate">
-                            {field}:
-                          </label>
-                          <input
-                            type="text"
-                            value={formFieldValues[field] || ''}
-                            onChange={(e) =>
-                              setFormFieldValues((prev) => ({
-                                ...prev,
-                                [field]: e.target.value,
-                              }))
-                            }
-                            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs text-zinc-900"
-                            placeholder={`Enter ${field}...`}
-                          />
+                    {splitMode === 'fixed' && (
+                      <div className="pt-1">
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={splitFixedCount}
+                          onChange={(e) => setSplitFixedCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                          className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Quality Preset Selector */}
+                {['compress-pdf', 'pdf-to-word', 'word-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-jpg', 'pdf-to-png', 'pdf-to-powerpoint', 'powerpoint-to-pdf'].includes(tool.slug) && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Compression & Quality
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['low', 'medium', 'high'] as ConversionQuality[]).map((q) => {
+                        const preset = QUALITY_PRESETS[q];
+                        const isSelected = quality === q;
+                        return (
+                          <button
+                            key={q}
+                            type="button"
+                            onClick={() => setQuality(q)}
+                            className={`rounded-xl border p-2.5 text-center transition-all cursor-pointer ${
+                              isSelected
+                                ? 'border-zinc-800 bg-zinc-50 ring-1 ring-zinc-800 text-zinc-900 font-bold'
+                                : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                            }`}
+                          >
+                            <span className="text-xs block capitalize">{q}</span>
+                            <span className="text-[10px] text-zinc-400 block truncate">{preset.badge}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Page Range Inputs (Extract, Delete, Thumbnails) */}
+                {(tool.slug === 'extract-pdf-pages' ||
+                  tool.slug === 'delete-pdf-pages' ||
+                  tool.slug === 'pdf-thumbnail-generator') && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      {tool.slug === 'delete-pdf-pages'
+                        ? 'Pages to delete (e.g. 1, 3, 5-7):'
+                        : tool.slug === 'pdf-thumbnail-generator'
+                        ? 'Target page number:'
+                        : 'Pages to extract (e.g. 1, 3, 5-8):'}
+                    </label>
+                    <input
+                      type="text"
+                      value={pageRange}
+                      onChange={(e) => {
+                        setPageRange(e.target.value);
+                        setDeleteConfirm(false);
+                      }}
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
+                      placeholder="e.g. 1, 3, 5-8"
+                    />
+
+                    {deleteConfirm && tool.slug === 'delete-pdf-pages' && (
+                      <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold">Confirm Deletion</p>
+                          <p className="mt-0.5 text-[11px] text-amber-800">
+                            Click "Confirm & Delete" below to proceed.
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                  {/* Translation */}
-                  {tool.slug === 'translate-pdf' && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100">
-                      <label className="text-xs font-bold text-zinc-700 uppercase font-mono block">
-                        Target Language:
+                {/* Watermark Stamp */}
+                {tool.slug === 'pdf-watermark' && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Watermark Stamp Text
+                    </label>
+                    <input
+                      type="text"
+                      value={watermarkText}
+                      onChange={(e) => setWatermarkText(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
+                      placeholder="e.g. CONFIDENTIAL or DRAFT"
+                    />
+                  </div>
+                )}
+
+                {/* Password Protection */}
+                {(tool.slug === 'protect-pdf' || tool.slug === 'unlock-pdf') && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      {tool.slug === 'protect-pdf' ? 'Set Password:' : 'Current Password:'}
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-mono text-zinc-900"
+                      placeholder="Enter password..."
+                    />
+                  </div>
+                )}
+
+                {/* Signature Pad */}
+                {tool.slug === 'sign-pdf' && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-bold text-zinc-800">
+                        Signature pad
                       </label>
-                      <select
-                        value={targetLang}
-                        onChange={(e) => setTargetLang(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-zinc-900"
+                      <button
+                        type="button"
+                        onClick={clearSignature}
+                        className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
                       >
-                        <option value="es">Spanish (Español)</option>
-                        <option value="fr">French (Français)</option>
-                        <option value="de">German (Deutsch)</option>
-                        <option value="it">Italian (Italiano)</option>
-                        <option value="pt">Portuguese (Português)</option>
-                        <option value="ru">Russian (Русский)</option>
-                        <option value="zh-CN">Chinese (Simplified)</option>
-                        <option value="ja">Japanese (日本語)</option>
-                        <option value="ko">Korean (한국어)</option>
-                        <option value="ar">Arabic (العربية)</option>
-                        <option value="hi">Hindi (हिन्दी)</option>
-                        <option value="ur">Urdu (اردو)</option>
-                        <option value="tr">Turkish (Türkçe)</option>
-                        <option value="nl">Dutch (Nederlands)</option>
-                      </select>
+                        Clear
+                      </button>
                     </div>
-                  )}
+                    <div className="rounded-xl border border-zinc-300 bg-white p-2">
+                      <canvas
+                        ref={sigCanvasRef}
+                        width={300}
+                        height={100}
+                        className="w-full h-24 bg-zinc-50 rounded-lg cursor-crosshair touch-none"
+                        onMouseDown={(e) => {
+                          setIsDrawing(true);
+                          setHasSignature(true);
+                          const ctx = sigCanvasRef.current?.getContext('2d');
+                          const rect = sigCanvasRef.current?.getBoundingClientRect();
+                          if (ctx && rect) {
+                            ctx.beginPath();
+                            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+                          }
+                        }}
+                        onMouseMove={(e) => {
+                          if (!isDrawing) return;
+                          const ctx = sigCanvasRef.current?.getContext('2d');
+                          const rect = sigCanvasRef.current?.getBoundingClientRect();
+                          if (ctx && rect) {
+                            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                            ctx.stroke();
+                          }
+                        }}
+                        onMouseUp={() => setIsDrawing(false)}
+                        onMouseLeave={() => setIsDrawing(false)}
+                      />
+                    </div>
+                  </div>
+                )}
 
-                  {/* Execute Button */}
+                {/* Translation Language */}
+                {tool.slug === 'translate-pdf' && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-zinc-800 block">
+                      Target Language
+                    </label>
+                    <select
+                      value={targetLang}
+                      onChange={(e) => setTargetLang(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-zinc-900"
+                    >
+                      <option value="es">Spanish (Español)</option>
+                      <option value="fr">French (Français)</option>
+                      <option value="de">German (Deutsch)</option>
+                      <option value="it">Italian (Italiano)</option>
+                      <option value="pt">Portuguese (Português)</option>
+                      <option value="ru">Russian (Русский)</option>
+                      <option value="zh-CN">Chinese (Simplified)</option>
+                      <option value="ja">Japanese (日本語)</option>
+                      <option value="ko">Korean (한국어)</option>
+                      <option value="ar">Arabic (العربية)</option>
+                      <option value="hi">Hindi (हिन्दी)</option>
+                      <option value="ur">Urdu (اردو)</option>
+                      <option value="tr">Turkish (Türkçe)</option>
+                      <option value="nl">Dutch (Nederlands)</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Main Action Button (Vibrant iLovePDF Style Crimson/Red Button) */}
+                <div className="pt-2">
                   <button
                     type="button"
                     onClick={handleExecute}
                     disabled={isProcessing}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-950/20 hover:bg-blue-500 transition-all cursor-pointer active:scale-98 uppercase tracking-wider disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-3 rounded-2xl bg-[#e5322d] px-6 py-4 text-base font-black text-white shadow-xl shadow-red-600/25 hover:bg-[#d42722] hover:shadow-2xl transition-all cursor-pointer active:scale-98 tracking-wide disabled:opacity-50"
                   >
-                    <Play className="h-4 w-4 fill-current" />
-                    <span>
-                      {deleteConfirm && tool.slug === 'delete-pdf-pages'
-                        ? 'Confirm & Delete Pages'
-                        : `Execute ${tool.name}`}
-                    </span>
-                  </button>
-
-                  {/* Processing Status Bar */}
-                  <ProcessingStatus
-                    isProcessing={isProcessing}
-                    progress={progress}
-                    statusText={statusText}
-                    error={error}
-                    onCancel={handleCancel}
-                  />
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: Document Live Preview & Results (lg:col-span-7) */}
-              <div className="lg:col-span-7 space-y-6">
-                
-                {/* File Information Card */}
-                <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-200">
-                      {tool.slug.includes('excel') ? (
-                        <FileSpreadsheet className="h-5 w-5" />
-                      ) : tool.slug.includes('jpg') || tool.slug.includes('png') ? (
-                        <ImageIcon className="h-5 w-5" />
-                      ) : (
-                        <FileText className="h-5 w-5" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-zinc-900 truncate">{files[0].name}</p>
-                      <p className="text-[11px] font-mono text-zinc-500">
-                        {(files[0].size / 1024 / 1024).toFixed(2)} MB · {files.length} file(s)
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="text-xs font-mono font-bold text-zinc-500 hover:text-zinc-800"
-                  >
-                    Replace
+                    <span>{getActionLabel()}</span>
+                    <ArrowRightCircle className="h-5 w-5 fill-white/20" />
                   </button>
                 </div>
 
-                {/* Download CTA Card (When Ready) */}
+                {/* Processing Progress Status */}
+                <ProcessingStatus
+                  isProcessing={isProcessing}
+                  progress={progress}
+                  statusText={statusText}
+                  error={error}
+                  onCancel={handleCancel}
+                />
+
+                {/* Result Download Card */}
                 {resultBlob && (
-                  <div className="rounded-3xl border border-emerald-300 bg-emerald-50/50 p-6 shadow-md shadow-emerald-950/5 space-y-4">
-                    <div className="flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase font-mono">
+                  <div className="rounded-2xl border border-emerald-300 bg-emerald-50/70 p-5 shadow-sm space-y-3 pt-4">
+                    <div className="flex items-center gap-2 text-emerald-900 text-xs font-bold uppercase font-mono">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      <span>Document Processing Finished</span>
+                      <span>Ready for Download</span>
                     </div>
 
                     <DownloadButton
@@ -1221,69 +1340,24 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
                       originalSizeBytes={files[0]?.size}
                       label={
                         resultFilename.endsWith('.zip')
-                          ? 'Download Archived Package (.ZIP)'
+                          ? 'Download ZIP'
                           : `Download ${tool.outputExtension.toUpperCase()}`
                       }
                     />
                   </div>
                 )}
 
-                {/* Document Live Preview Pane */}
-                <div className="rounded-3xl border border-zinc-200 bg-zinc-900 text-white p-5 shadow-lg space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                    <span className="text-xs font-mono text-zinc-400 flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      Document Live View
-                    </span>
-                    {previewTotalPages > 1 && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-zinc-400">
-                          {previewPage} / {previewTotalPages}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => changePreviewPage(previewPage - 1)}
-                          disabled={previewPage <= 1}
-                          className="p-1 rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 disabled:opacity-30 hover:bg-zinc-700"
-                        >
-                          <ChevronLeft className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => changePreviewPage(previewPage + 1)}
-                          disabled={previewPage >= previewTotalPages}
-                          className="p-1 rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 disabled:opacity-30 hover:bg-zinc-700"
-                        >
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-center overflow-auto max-h-[560px] bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80">
-                    {previewImageSrc ? (
-                      <img
-                        src={previewImageSrc}
-                        alt="Uploaded preview"
-                        className="max-h-[500px] w-auto object-contain rounded shadow"
-                      />
-                    ) : (
-                      <canvas ref={previewCanvasRef} className="max-w-full shadow-2xl rounded" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Metadata Summary (If Viewed) */}
+                {/* Metadata Inspection View */}
                 {metadataInfo && (
-                  <div className="rounded-2xl border border-zinc-200 bg-white p-5 space-y-3">
-                    <h4 className="text-xs font-bold text-zinc-900 uppercase font-mono border-b pb-2">
-                      Metadata Inspection Results
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-2 max-h-48 overflow-y-auto">
+                    <h4 className="text-[11px] font-bold text-zinc-900 uppercase font-mono border-b pb-1">
+                      Metadata Report
                     </h4>
-                    <div className="divide-y divide-zinc-100 text-xs">
+                    <div className="divide-y divide-zinc-200 text-[11px]">
                       {Object.entries(metadataInfo).map(([k, v]) => (
-                        <div key={k} className="py-2 flex justify-between gap-4">
-                          <span className="font-semibold text-zinc-600 capitalize">{k}</span>
-                          <span className="text-zinc-900 font-mono text-right">{String(v)}</span>
+                        <div key={k} className="py-1 flex justify-between gap-2">
+                          <span className="font-medium text-zinc-500 capitalize">{k}</span>
+                          <span className="text-zinc-900 font-mono truncate">{String(v)}</span>
                         </div>
                       ))}
                     </div>
@@ -1294,7 +1368,7 @@ export default function ToolPageLayout({ tool }: ToolPageLayoutProps) {
           )}
 
           {/* Privacy Guarantee Note */}
-          <div className="mt-8 flex items-center justify-center gap-2 text-center text-xs text-zinc-500 font-mono">
+          <div className="mt-10 flex items-center justify-center gap-2 text-center text-xs text-zinc-500 font-mono">
             <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>
               100% In-Memory Sandbox. Documents never touch external cloud servers.
